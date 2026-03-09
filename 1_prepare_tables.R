@@ -8,6 +8,7 @@ transport <- read_csv("data/transport_methods.csv")
 poor_exp <- read_csv("data/poor_experiences.csv")
 environment <- read_csv("data/environment.csv")
 itinerary <- read_csv("data/itinerary.csv")
+travel_party <- read_csv("data/travel_party.csv")
 
 # filter only following columns
 
@@ -39,8 +40,8 @@ survey_clean <- survey |>
     # "incl_stay_other_country",
     # "no_nights_other_country",
     "single_or_others",
-    "no_people_over_15",
-    "no_people_under_15",
+    # "no_people_over_15",
+    # "no_people_under_15",
     # "currency",
     # "other_purchase",
     "age_range",
@@ -207,4 +208,28 @@ region_visits <- itinerary |>
 # by each respondent
 dim(region_visits)
 
+# output to file
 # write_csv(region_visits, "output/region_visits.csv")
+
+# select survey columns
+# pivot travel_party wider
+# left join
+
+travel_party_processed <- travel_party |>
+  mutate(value = 1) |>
+  pivot_wider(
+    names_from = travelled_with,
+    values_from = value,
+    values_fill = 0
+  ) |>
+  janitor::clean_names()
+
+# TRAVEL_PARTY$TRAVELLED_WITH VALUES:
+# Child/children aged under 15
+# My husband, wife or partner
+# No one, I was on my own
+# Other adult(s) who are not family / relatives
+# Child/children aged 15 or older
+# Other adult family / relative
+
+# write_csv(travel_party_processed, "output/travel_party_processed.csv")
