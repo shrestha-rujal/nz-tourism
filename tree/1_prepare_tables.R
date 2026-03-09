@@ -1,16 +1,18 @@
 library(tidyverse)
 
-survey <- read_csv("data/survey_main_header.csv")
-satisfaction <- read_csv("data/visitor_satisfaction.csv")
-accommodation <- read_csv("data/accommodation.csv")
-activities <- read_csv("data/activities.csv")
-transport <- read_csv("data/transport_methods.csv")
-self_transport <- read_csv("data/self_transport.csv")
-poor_exp <- read_csv("data/poor_experiences.csv")
-environment <- read_csv("data/environment.csv")
-itinerary <- read_csv("data/itinerary.csv")
-travel_party <- read_csv("data/travel_party.csv")
-expenditure <- read_csv("data/expenditure_by_industry.csv")
+setwd("/Users/rujalshrestha/Projects/nz-tourism/tree")
+
+survey <- read_csv("../data/survey_main_header.csv")
+satisfaction <- read_csv("../data/visitor_satisfaction.csv")
+accommodation <- read_csv("../data/accommodation.csv")
+activities <- read_csv("../data/activities.csv")
+transport <- read_csv("../data/transport_methods.csv")
+self_transport <- read_csv("../data/self_transport.csv")
+poor_exp <- read_csv("../data/poor_experiences.csv")
+environment <- read_csv("../data/environment.csv")
+itinerary <- read_csv("../data/itinerary.csv")
+travel_party <- read_csv("../data/travel_party.csv")
+expenditure <- read_csv("../data/expenditure_by_industry.csv")
 
 # filter only following columns
 survey_clean <- survey |>
@@ -544,11 +546,6 @@ survey_clean_age <- survey_clean_first_trip |>
     "65 - 69", "70 - 74", "75 or older"
   ), ordered = TRUE))
 
-survey_clean_age |>
-  count(age_range) |>
-  View()
-
-View(survey_clean_age)
 
 # count NAs in each column
 survey_clean_age |>
@@ -562,3 +559,13 @@ survey_clean_age |>
 
 # saveRDS(survey_clean_age, "output/survey_cleaned.rds")
 # write_csv(survey_clean_age, "output/survey_cleaned.csv")
+
+
+#########################
+# ACCOMODATION
+#########################
+
+accommodation |>
+  count(accomm_type_used) |>
+  arrange(desc(n)) |>
+  View()
