@@ -509,10 +509,49 @@ survey_clean_first_trip |>
 # No 14293
 # Yes 13723
 
-View(survey_clean_first_trip)
+
+#########################
+# AGE RANGE
+#########################
+
+survey_clean_first_trip |>
+  count(age_range) |>
+  arrange(desc(n))
+
+# 3325.   30 - 34
+# 3135.   25 - 29
+# 3037.   60 - 64
+# 2661.   65 - 69
+# 2635.   55 - 59
+# 2414.   50 - 54
+# 2281.   35 - 39
+# 2000.   40 - 44
+# 1943.   45 - 49
+# 1643.   20 - 24
+# 1514.   70 - 74
+# 863.    75 or older
+# 483.    Under 20
+# 82.     Rather not say
+
+dim(survey_clean_first_trip)
+# 27,934 rows
+
+survey_clean_age <- survey_clean_first_trip |>
+  filter(age_range != "Rather not say") |> # 82 rows dropped
+  mutate(age_range = factor(age_range, levels = c(
+    "Under 20", "20 - 24", "25 - 29", "30 - 34", "35 - 39",
+    "40 - 44", "45 - 49", "50 - 54", "55 - 59", "60 - 64",
+    "65 - 69", "70 - 74", "75 or older"
+  ), ordered = TRUE))
+
+survey_clean_age |>
+  count(age_range) |>
+  View()
+
+View(survey_clean_age)
 
 # count NAs in each column
-survey_clean_first_trip |>
+survey_clean_age |>
   summarise(across(everything(), ~ sum(is.na(.)))) |>
   pivot_longer(
     everything(),
@@ -521,4 +560,5 @@ survey_clean_first_trip |>
   ) |>
   arrange(desc(na_count))
 
-# All NAs eliminated
+# saveRDS(survey_clean_age, "output/survey_cleaned.rds")
+# write_csv(survey_clean_age, "output/survey_cleaned.csv")
