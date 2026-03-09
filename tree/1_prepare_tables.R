@@ -696,3 +696,43 @@ ease_cleaned <- ease |>
 
 # write_csv(ease_cleaned, "output/ease_cleaned.csv")
 # saveRDS(ease_cleaned, "output/ease_cleaned.rds")
+
+
+
+#########################
+# ENVIRONMENT
+#########################
+
+environment |>
+  count(experience)
+
+# Availability of public facilities (toilets, rubbish bins, etc)
+# Feeling of safety
+# Feeling welcomed
+# Natural scenery/ wilderness
+# Protection of natural resources
+# Protection of wildlife (whales, penguins, albatross, kiwi, etc)
+# Quality of drinking water
+# Quality of flowing water (rivers, streams, sea)
+# Quality of the air
+
+environment |>
+  count(rating)
+
+environment_processed <- environment |>
+  filter(rating != "Don't know / Not applicable") |>
+  mutate(rating = factor(rating, levels = c(
+    "1 - Very Poor",
+    "2 - Poor",
+    "3 - Neither good nor poor",
+    "4 - Good",
+    "5 - Very Good"
+  ), ordered = TRUE)) |>
+  pivot_wider(
+    names_from = "experience",
+    values_from = "rating"
+  ) |>
+  janitor::clean_names()
+
+# write_csv(environment_processed, "output/environment_processed.csv")
+# saveRDS(environment_processed, "output/environment_processed.rds")
