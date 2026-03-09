@@ -10,6 +10,7 @@ poor_exp <- read_csv("data/poor_experiences.csv")
 environment <- read_csv("data/environment.csv")
 itinerary <- read_csv("data/itinerary.csv")
 travel_party <- read_csv("data/travel_party.csv")
+expenditure <- read_csv("data/expenditure_by_industry.csv")
 
 # filter only following columns
 
@@ -40,7 +41,7 @@ survey_clean <- survey |>
     # "trip_start_country",
     # "incl_stay_other_country",
     # "no_nights_other_country",
-    "single_or_others",
+    # "single_or_others",
     # "no_people_over_15",
     # "no_people_under_15",
     # "currency",
@@ -49,12 +50,12 @@ survey_clean <- survey |>
     # "visited_ni",
     # "visited_si",
     "travel_type",
-    "main_transport_type",
+    # "main_transport_type",
     "sustainability_considered",
     "treated_spend",
-    "population_weight",
-    "psu",
-    "vem_pop_weight"
+    # "population_weight",
+    # "psu",
+    # "vem_pop_weight"
   )
 
 # count NAs in each column
@@ -65,7 +66,8 @@ survey_clean |>
     names_to = "column",
     values_to = "na_count"
   ) |>
-  arrange(desc(na_count))
+  arrange(desc(na_count)) |>
+  View()
 
 itinerary |>
   select(place_stayed) |>
@@ -252,21 +254,21 @@ transport |>
 # 3552   The ferry between the North Island and the South Island
 # 3414   Tour bus
 # 2874   Other ferry
-# 2497   1Other boat or ship
-# 2194   1Bus service between towns / cities
-# 1690   1Rental campervan / motor-home
-# 1578   1Scenic trains
-# 1393   1Bicycle
-# 1304   1Helicopter
-# 1282   1Train
-# 798    1Other bus service
-# 750    1Limousine / car with driver included
-# 615    1Other type of transport
-# 386    2Campervan / motor-home owned by you / family / friend(s)
-# 293    2Hitch-hiking
-# 228    2Yacht
-# 199    2Motorcycle
-# 157    2Not sure
+# 2497   Other boat or ship
+# 2194   Bus service between towns / cities
+# 1690   Rental campervan / motor-home
+# 1578   Scenic trains
+# 1393   Bicycle
+# 1304   Helicopter
+# 1282   Train
+# 798    Other bus service
+# 750    Limousine / car with driver included
+# 615    Other type of transport
+# 386    Campervan / motor-home owned by you / family / friend(s)
+# 293    Hitch-hiking
+# 228    Yacht
+# 199    Motorcycle
+# 157    Not sure
 
 transport_oh <- transport |>
   mutate(value = 1) |>
@@ -304,3 +306,171 @@ transport_total <- transport_oh |>
   mutate(drove_themselves = replace_na(drove_themselves, 0L))
 
 # write_csv(transport_total, "output/transport_processed.csv")
+
+
+#########################
+# PURPOSE
+#########################
+
+
+survey |>
+  select(purpose_of_visit_main) |>
+  distinct()
+
+# Visiting friends / relatives
+# Holiday / vacation
+# Other
+# Business
+# Conference / convention
+# Education
+
+survey |>
+  select(purpose_subtype) |>
+  distinct()
+
+# To visit family
+# To visit friends
+# Just for the holiday
+# To care for a family member or friend
+# For a wedding, funeral, other family occasion
+# For some other reason
+# NA (Business)
+# For some other reason (please specify)
+# For your honeymoon
+# To go sightseeing
+# For some special event or occasion (non-sport-related)
+# Related to your job or business
+# To watch a sporting event
+# For a working holiday
+# To do other work
+# As an incentive trip as a reward for good work or sales
+# To take part (participate) in a sporting event
+# Not related to your job or business
+# For a stop-over – between flights
+# To do seasonal work
+# On a school education trip
+# Some other educational purpose
+# An exchange program
+
+survey |>
+  select(response_id, purpose_of_visit_main, purpose_subtype) |>
+  filter(purpose_of_visit_main == "Other") |>
+  count(purpose_subtype) |>
+  arrange(desc(n))
+
+survey_clean %>%
+  count(purpose_subtype) %>%
+  arrange(n)
+
+# create new visit_purpose column using purpose_subtype
+# group 2 sports related subtypes
+# group sparse subtypes into 'Other'
+
+sports_related <- c(
+  "To watch a sporting event",
+  "To take part (participate) in a sporting event"
+)
+
+sparse_purposes <- c(
+  "To do seasonal work",
+  "For a stop-over – between flights",
+  "As an incentive trip as a reward for good work or sales",
+  "Not related to your job or business",
+  "To do other work",
+  "An exchange program",
+  "On a school education trip",
+  "Some other educational purpose"
+)
+
+survey_clean_purpose <- survey_clean |>
+  mutate(visit_purpose = case_when(
+    is.na(purpose_subtype) ~ "Business",
+    purpose_subtype %in% sports_related ~ "Sports related",
+    purpose_subtype %in% sparse_purposes ~ "Other",
+    # distinguish the two "For some other reason" groups by main purpose
+    purpose_subtype == "For some other reason (please specify)" ~ "Holiday - Other",
+    purpose_subtype == "For some other reason" & purpose_of_visit_main == "Visiting friends / relatives" ~ "Visiting Friends/Relatives - Other",
+    purpose_subtype == "For some other reason" & purpose_of_visit_main == "Other" ~ "Other",
+    TRUE ~ purpose_subtype
+  ))
+
+survey_clean_purpose |>
+  count(visit_purpose) |>
+  arrange(desc(n))
+
+# 7054.   Just for the holiday
+# 6510.   To visit family
+# 5682.   To go sightseeing
+# 1454.   Business
+# 1404.   To visit friends
+# 1238.   Holiday - Other
+# 1196.   For a wedding, funeral, other family occasion
+# 957.    Other
+# 950.    For your honeymoon
+# 579.    For a working holiday
+# 571.    To care for a family member or friend
+# 533.    For some special event or occasion (non-sport-related)
+# 504.    Related to your job or business
+# 218.    Visiting Friends/Relatives - Other
+# 150.    Sports related
+
+
+#########################
+# TREATED SPEND
+#########################
+
+spend_analysis <- survey |>
+  select(
+    response_id,
+    single_or_others,
+    no_people_over_15,
+    no_people_under_15,
+    treated_spend,
+  ) |>
+  left_join(expenditure, by = "response_id")
+
+options(scipen = 999)
+summary(spend_analysis$treated_spend)
+
+#   Min.    1st Qu.     Median       Mean    3rd Qu.         Max.
+#  5.338   1,701.272   3,355.218   4,853.544   6,160.786   114,675.376
+
+# plot to see treated_spend distribution
+spend_analysis |>
+  ggplot(aes(x = treated_spend)) +
+  geom_histogram(bins = 50) +
+  scale_x_log10() +
+  labs(
+    title = "Distribution of treated_spend by reporting scope",
+    x = "treated_spend (log scale)"
+  )
+
+spendings <- spend_analysis |>
+  mutate(
+    single_or_grouped = if_else(
+      single_or_others == "What the visit to NZ cost just for yourself",
+      "Single",
+      "Grouped"
+    ),
+    cost_sum = cost_accomm + cost_dom_travel + cost_food_drink +
+      cost_entertainment + cost_shopping + cost_other + cost_tour_package +
+      cost_dom_flights + cost_car_rentals + cost_eating_out + cost_day_cruise,
+    diff = round(treated_spend - cost_sum),
+  ) |>
+  select(
+    single_or_grouped,
+    no_people_under_15,
+    no_people_over_15,
+    treated_spend,
+    cost_sum,
+    diff
+  )
+
+# per head spending distribution of people who came single vs grouped
+
+spendings |>
+  group_by(single_or_grouped) |>
+  summarise(
+    mean = mean(treated_spend),
+    median = median(treated_spend)
+  )
