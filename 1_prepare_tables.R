@@ -5,6 +5,7 @@ satisfaction <- read_csv("data/visitor_satisfaction.csv")
 accommodation <- read_csv("data/accommodation.csv")
 activities <- read_csv("data/activities.csv")
 transport <- read_csv("data/transport_methods.csv")
+self_transport <- read_csv("data/self_transport.csv")
 poor_exp <- read_csv("data/poor_experiences.csv")
 environment <- read_csv("data/environment.csv")
 itinerary <- read_csv("data/itinerary.csv")
@@ -64,8 +65,7 @@ survey_clean |>
     names_to = "column",
     values_to = "na_count"
   ) |>
-  arrange(desc(na_count)) |>
-  View()
+  arrange(desc(na_count))
 
 itinerary |>
   select(place_stayed) |>
@@ -233,3 +233,74 @@ travel_party_processed <- travel_party |>
 # Other adult family / relative
 
 # write_csv(travel_party_processed, "output/travel_party_processed.csv")
+
+
+#########################
+# TRANSPORT
+#########################
+
+transport |>
+  count(transport_method) |>
+  arrange(desc(n))
+
+# 10218  Rental car
+# 8847   Taxi / shuttle service
+# 7607   Car or van owned by you / family / friend(s) / company
+# 5934   App-based services such as Uber, Ola, etc
+# 5453   Plane (within New Zealand)
+# 5168   Local bus service
+# 3552   The ferry between the North Island and the South Island
+# 3414   Tour bus
+# 2874   Other ferry
+# 2497   1Other boat or ship
+# 2194   1Bus service between towns / cities
+# 1690   1Rental campervan / motor-home
+# 1578   1Scenic trains
+# 1393   1Bicycle
+# 1304   1Helicopter
+# 1282   1Train
+# 798    1Other bus service
+# 750    1Limousine / car with driver included
+# 615    1Other type of transport
+# 386    2Campervan / motor-home owned by you / family / friend(s)
+# 293    2Hitch-hiking
+# 228    2Yacht
+# 199    2Motorcycle
+# 157    2Not sure
+
+transport_oh <- transport |>
+  mutate(value = 1) |>
+  pivot_wider(
+    names_from = transport_method,
+    values_from = value,
+    values_fill = 0
+  ) |>
+  janitor::clean_names()
+
+self_transport |>
+  count(drive_yourself) |>
+  arrange(desc(n))
+
+# Yes             13905
+# No              4994
+# Can’t remember  42
+
+dim(self_transport)
+# 18,941 rows
+
+self_transport_clean <- self_transport |>
+  distinct(response_id, drive_yourself) |>
+  mutate(drove_themselves = as.integer(drive_yourself == "Yes")) |>
+  select(response_id, drove_themselves)
+
+dim(self_transport_clean)
+# 17,786 rows
+
+dim(transport_oh)
+# 23,356 rows
+
+transport_total <- transport_oh |>
+  left_join(self_transport_clean, by = "response_id") |>
+  mutate(drove_themselves = replace_na(drove_themselves, 0L))
+
+# write_csv(transport_total, "output/transport_processed.csv")
