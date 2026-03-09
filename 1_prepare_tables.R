@@ -13,11 +13,10 @@ travel_party <- read_csv("data/travel_party.csv")
 expenditure <- read_csv("data/expenditure_by_industry.csv")
 
 # filter only following columns
-
 survey_clean <- survey |>
   select(
-    "year",
-    "qtr",
+    # "year",
+    # "qtr",
     # "date",
     "response_id",
     # "identifier",
@@ -57,27 +56,6 @@ survey_clean <- survey |>
     # "psu",
     # "vem_pop_weight"
   )
-
-# count NAs in each column
-survey_clean |>
-  summarise(across(everything(), ~ sum(is.na(.)))) |>
-  pivot_longer(
-    everything(),
-    names_to = "column",
-    values_to = "na_count"
-  ) |>
-  arrange(desc(na_count)) |>
-  View()
-
-itinerary |>
-  select(place_stayed) |>
-  unique() |>
-  count()
-
-itinerary |>
-  filter(place_stayed == "Other") |>
-  count()
-
 
 # map places stayed into regions
 
@@ -213,9 +191,11 @@ dim(region_visits)
 # output to file
 # write_csv(region_visits, "output/region_visits.csv")
 
-# select survey columns
-# pivot travel_party wider
-# left join
+
+
+#########################
+# TRAVEL PARTY
+#########################
 
 travel_party_processed <- travel_party |>
   mutate(value = 1) |>
@@ -392,7 +372,8 @@ survey_clean_purpose <- survey_clean |>
     purpose_subtype == "For some other reason" & purpose_of_visit_main == "Visiting friends / relatives" ~ "Visiting Friends/Relatives - Other",
     purpose_subtype == "For some other reason" & purpose_of_visit_main == "Other" ~ "Other",
     TRUE ~ purpose_subtype
-  ))
+  )) |>
+  select(-purpose_of_visit_main, -purpose_subtype)
 
 survey_clean_purpose |>
   count(visit_purpose) |>
@@ -474,3 +455,70 @@ spendings |>
     mean = mean(treated_spend),
     median = median(treated_spend)
   )
+
+# turns out treated spend is actually already 'treated', can use as is
+
+
+#########################
+# ARRIVAL DATE
+#########################
+
+survey_clean_arrival <- survey_clean_purpose |>
+  filter(!is.na(arrival_date)) |> # dropped 664 rows
+  mutate(
+    arrival_date = as.Date(arrival_date),
+    arrival_month = month(arrival_date),
+    arrival_year = year(arrival_date),
+    arrival_season = case_when(
+      arrival_month %in% c(12, 1, 2) ~ "Summer",
+      arrival_month %in% c(3, 4, 5) ~ "Autumn",
+      arrival_month %in% c(6, 7, 8) ~ "Winter",
+      arrival_month %in% c(9, 10, 11) ~ "Spring",
+    )
+  )
+
+
+#########################
+# PACKAGE DEAL
+#########################
+
+survey_clean_arrival |>
+  count(package_deal) |>
+  arrange(desc(n))
+
+# 24479  No
+# 3247   Yes
+# 312    NA
+# 298    Not sure
+
+survey_clean_package <- survey_clean_arrival |>
+  filter(!is.na(package_deal))
+
+
+#########################
+# FIRST NZ TRIP
+#########################
+
+survey_clean_first_trip <- survey_clean_package |>
+  filter(!is.na(first_nz_trip))
+
+survey_clean_first_trip |>
+  count(first_nz_trip) |>
+  arrange(desc(n))
+
+# No 14293
+# Yes 13723
+
+View(survey_clean_first_trip)
+
+# count NAs in each column
+survey_clean_first_trip |>
+  summarise(across(everything(), ~ sum(is.na(.)))) |>
+  pivot_longer(
+    everything(),
+    names_to = "column",
+    values_to = "na_count"
+  ) |>
+  arrange(desc(na_count))
+
+# All NAs eliminated
