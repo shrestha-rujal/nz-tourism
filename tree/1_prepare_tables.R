@@ -3,6 +3,7 @@ library(tidyverse)
 setwd("/Users/rujalshrestha/Projects/nz-tourism/tree")
 
 survey <- read_csv("../data/survey_main_header.csv")
+decision <- read_csv("../data/decision_making_process.csv")
 satisfaction <- read_csv("../data/visitor_satisfaction.csv")
 accommodation <- read_csv("../data/accommodation.csv")
 activities <- read_csv("../data/activities.csv")
@@ -13,6 +14,7 @@ environment <- read_csv("../data/environment.csv")
 itinerary <- read_csv("../data/itinerary.csv")
 travel_party <- read_csv("../data/travel_party.csv")
 expenditure <- read_csv("../data/expenditure_by_industry.csv")
+ease <- read_csv("../data/ease_of_organisation.csv")
 
 # filter only following columns
 survey_clean <- survey |>
@@ -191,7 +193,7 @@ region_visits <- itinerary |>
 dim(region_visits)
 
 # output to file
-# write_csv(region_visits, "output/region_visits.csv")
+# write_csv(region_visits, "output/region_visits_processed.csv")
 
 
 
@@ -567,5 +569,130 @@ survey_clean_age |>
 
 accommodation |>
   count(accomm_type_used) |>
-  arrange(desc(n)) |>
-  View()
+  arrange(desc(n))
+
+# 9381  Hotel
+# 9255  Staying with family or friends
+# 8059  House/ flat/ apartment booked through an online website (including Booking.com, AirBnB, HomeSwap, HomeStay, Hotel.com, Expedia, etc)
+# 4727  Motel, Motor Inn or Serviced Apartment
+# 2401  Other (paid) camping ground / holiday park (where you can stay in a tent, cabin, caravan, or campervan / motorhome)
+# 2055  Luxury Accommodation, 5-star Hotel, Luxury Lodge
+# 1561  Bed and Breakfast
+# 1545  Backpackers
+# 1425  Free camping - staying in a tent, caravan, campervan / motorhome
+# 1318  House / flat that you paid some rent for
+# 1305  Camping at a National Park / Department of Conservation camping ground
+# 1074  Youth Hostel, YMCA, YWCA
+# 727   Another place where you pay to park a caravan or campervan / motorhome overnight
+# 632   Farm-stay or Home-stay
+# 553   In a hut at a National Park / Department of Conservation area
+# 339   Other accommodation
+# 275   None of these
+# 259   A house/ flat/ apartment/ timeshare you own
+# 237   Yacht or other boat
+# 78    Not sure
+# 69    Student residence
+# 61    Marae
+
+accomm_to_group <- c("Marae", "Student residence", "Other accommodation")
+
+accommodation_processed <- accommodation |>
+  filter(accomm_type_used != "Not sure") |> # 78 rows removed
+  mutate(accomm_grouped = case_when(
+    accomm_type_used %in% accomm_to_group ~ "Other accommodation",
+    TRUE ~ accomm_type_used
+  )) |>
+  mutate(value = 1) |>
+  select(response_id, accomm_grouped, value) |>
+  pivot_wider(
+    names_from = accomm_grouped,
+    values_from = value,
+    values_fill = 0,
+    values_fn = max
+  ) |>
+  janitor::clean_names()
+
+# write_csv(accommodation_processed, "output/accommodation_processed.csv")
+
+
+
+#########################
+# DECISION MAKING PROCESS
+#########################
+
+decision |>
+  count(factor_for_visit) |>
+  arrange(desc(n))
+
+# 9939  Its landscapes and scenery
+# 8701  I wanted to visit friends or family in New Zealand
+# 5813  I've always wanted to visit
+# 4568  It was somewhere new, I had never been there before
+# 4001  New Zealand was a safe place to visit as it is less crowded than most other places
+# 3978  The variety of outdoor and adventure activities
+# 3640  Friends, family or colleagues talked about or recommended New Zealand
+# 2965  Its environmentally friendly image
+# 2853  The Hobbit and Lord of the Ring Movies
+# 2104  I wanted to see the unique indigenous Maori culture
+# 1738  A specific event brought me to New Zealand e.g. sporting or cultural event, wedding, family event, etc
+# 1705  New Zealand's food and wine
+# 1661  I read about New Zealand in online articles, travel forums, blogs, social networking sites, etc
+# 1634  Something else
+# 1443  Work / business
+# 867  I saw or found a good deal on flights to New Zealand/ a good travel package to New Zealand
+# 832  Sports events or activities
+# 669  I was confident there would be health and hygiene measures in New Zealand to help protect against COVID-19
+# 620  I saw a show or segment featuring New Zealand on TV
+# 537  I read about New Zealand in a newspaper, or magazine
+# 417  Other movies that were filmed in New Zealand
+# 369  None of these
+# 172  My travel agent talked about or recommended New Zealand
+
+decision_processed <- decision |>
+  mutate(
+    factor_for_visit = case_when(
+      str_detect(factor_for_visit, "^Something else") ~ "Something else",
+      TRUE ~ factor_for_visit
+    )
+  ) |>
+  mutate(value = 1) |>
+  select(response_id, factor_for_visit, value) |>
+  pivot_wider(
+    names_from = factor_for_visit,
+    values_from = value,
+    values_fill = 0,
+    values_fn = max
+  ) |>
+  janitor::clean_names()
+
+# write_csv(decision_processed, "output/decision_process_processed.csv")
+
+
+
+#########################
+# EASE OF ORGANIZATION
+#########################
+
+ease |>
+  count(organisation_ease) |>
+  arrange(desc(n))
+
+# 9972   3 - Easy
+# 9172   4 - Very easy
+# 2327   2 - Somewhat difficult
+# 390    Not sure
+# 151    1 - Very difficults
+
+ease_cleaned <- ease |>
+  filter(organisation_ease != "Not sure") |>
+  mutate(organisation_ease = factor(organisation_ease,
+    levels = c(
+      "1 - Very difficult",
+      "2 - Somewhat difficult",
+      "3 - Easy",
+      "4 - Very easy"
+    ), ordered = TRUE
+  ))
+
+# write_csv(ease_cleaned, "output/ease_cleaned.csv")
+# saveRDS(ease_cleaned, "output/ease_cleaned.rds")
