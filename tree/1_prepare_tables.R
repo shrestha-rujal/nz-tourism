@@ -18,6 +18,7 @@ ease <- read_csv("../data/ease_of_organisation.csv")
 maori_experience <- read_csv("../data/maori_cultural_experience.csv")
 maori_sentiment <- read_csv("../data/maori_cultural_sentiment.csv")
 mobility <- read_csv("../data/mobility.csv")
+other_countries <- read_csv("../data/other_countries_visited.csv")
 
 
 # filter only following columns
@@ -823,3 +824,20 @@ mobility_processed <- mobility |>
 
 # write_csv(mobility_processed, "output/mobility_processed.csv")
 # saveRDS(mobility_processed, "output/mobility_processed.rds")
+
+
+
+##################################################
+# VISITED OTHER COUNTRIES
+##################################################
+
+other_countries_processed <- other_countries |>
+  group_by(response_id) |>
+  summarise(
+    visited_other_countries = 1L,
+    no_countries_visited = n_distinct(country),
+    visited_before = as.integer(any(visited_before_or_after == "Before")),
+    visited_after = as.integer(any(visited_before_or_after == "After"))
+  )
+
+# write_csv(other_countries_processed, "output/other_countries_processed.csv")
