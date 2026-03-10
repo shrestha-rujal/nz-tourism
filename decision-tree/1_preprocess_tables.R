@@ -1,6 +1,6 @@
 library(tidyverse)
 
-setwd("/Users/rujalshrestha/Projects/nz-tourism/tree")
+setwd("/Users/rujalshrestha/Projects/nz-tourism/decision-tree")
 
 survey <- read_csv("../data/survey_main_header.csv")
 decision <- read_csv("../data/decision_making_process.csv")
@@ -190,7 +190,8 @@ region_visits <- itinerary |>
     names_from = region,
     values_from = value,
     values_fill = 0
-  )
+  ) |>
+  rename_with(~ paste0("itinerary_", .), -response_id)
 
 # region_visits contains 24,820 rows with 17 columns for regions visited
 # by each respondent
@@ -212,7 +213,8 @@ travel_party_processed <- travel_party |>
     values_from = value,
     values_fill = 0
   ) |>
-  janitor::clean_names()
+  janitor::clean_names() |>
+  rename_with(~ paste0("travel_party_", .), -response_id)
 
 # TRAVEL_PARTY$TRAVELLED_WITH VALUES:
 # Child/children aged under 15
@@ -287,7 +289,8 @@ self_transport_clean <- self_transport |>
 
 transport_total <- transport_oh |>
   left_join(self_transport_clean, by = "response_id") |>
-  mutate(drove_themselves = replace_na(drove_themselves, 0L))
+  mutate(drove_themselves = replace_na(drove_themselves, 0L)) |>
+  rename_with(~ paste0("transport_", .), -response_id)
 
 # write_csv(transport_total, "output/transport_processed.csv")
 
@@ -607,7 +610,8 @@ accommodation_processed <- accommodation |>
     values_fill = 0,
     values_fn = max
   ) |>
-  janitor::clean_names()
+  janitor::clean_names() |>
+  rename_with(~ paste0("accomm_", .), -response_id)
 
 # write_csv(accommodation_processed, "output/accommodation_processed.csv")
 
@@ -660,7 +664,8 @@ decision_processed <- decision |>
     values_fill = 0,
     values_fn = max
   ) |>
-  janitor::clean_names()
+  janitor::clean_names() |>
+  rename_with(~ paste0("decision_", .), -response_id)
 
 # write_csv(decision_processed, "output/decision_process_processed.csv")
 
@@ -729,7 +734,8 @@ environment_processed <- environment |>
     names_from = "experience",
     values_from = "rating"
   ) |>
-  janitor::clean_names()
+  janitor::clean_names() |>
+  rename_with(~ paste0("environment_", .), -response_id)
 
 # write_csv(environment_processed, "output/environment_processed.csv")
 # saveRDS(environment_processed, "output/environment_processed.rds")
@@ -747,7 +753,8 @@ maori_experience_processed <- maori_experience |>
     values_fill = 0,
     values_fn = max
   ) |>
-  janitor::clean_names()
+  janitor::clean_names() |>
+  rename_with(~ paste0("maori_exp_", .), -response_id)
 
 # write_csv(maori_experience_processed, "output/maori_experience_processed.csv")
 
@@ -812,7 +819,8 @@ mobility_processed <- mobility |>
     names_from = mobility_difficulty,
     values_from = rating
   ) |>
-  janitor::clean_names()
+  janitor::clean_names() |>
+  rename_with(~ paste0("mobility_", .), -response_id)
 
 # write_csv(mobility_processed, "output/mobility_processed.csv")
 # saveRDS(mobility_processed, "output/mobility_processed.rds")
@@ -830,7 +838,8 @@ other_countries_processed <- other_countries |>
     no_countries_visited = n_distinct(country),
     visited_before = as.integer(any(visited_before_or_after == "Before")),
     visited_after = as.integer(any(visited_before_or_after == "After"))
-  )
+  ) |>
+  rename_with(~ paste0("other_countries_", .), -response_id)
 
 # write_csv(other_countries_processed, "output/other_countries_processed.csv")
 
@@ -865,7 +874,8 @@ poor_experiences_processed <- poor_exp |>
     names_from = type,
     values_from = frequency
   ) |>
-  janitor::clean_names()
+  janitor::clean_names() |>
+  rename_with(~ paste0("poor_exp_", .), -response_id)
 
 # write_csv(poor_experiences_processed, "output/poor_experiences_processed.csv")
 # saveRDS(poor_experiences_processed, "output/poor_experiences_processed.rds")
@@ -974,7 +984,8 @@ activities_processed <- activities |>
     values_fill = 0,
     values_fn = max
   ) |>
-  janitor::clean_names()
+  janitor::clean_names() |>
+  rename_with(~ paste0("activity_", .), -response_id)
 
 # write_csv(activities_processed, "output/activities_processed.csv")
 

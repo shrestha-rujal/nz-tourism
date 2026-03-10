@@ -1,4 +1,4 @@
-response_id,crime_or_theft,dangerous_driving_including_speeding_and_drink_driving,litter_waste_on_the_streets,overcrowded_sightseeing_spot,overcrowded_vehicle_parking_lot,rude_behaviour_from_locals,vandalism_such_as_graffiti_tagging_broken_windows_in_shops_and_public_buildings
+response_id,poor_exp_crime_or_theft,poor_exp_dangerous_driving_including_speeding_and_drink_driving,poor_exp_litter_waste_on_the_streets,poor_exp_overcrowded_sightseeing_spot,poor_exp_overcrowded_vehicle_parking_lot,poor_exp_rude_behaviour_from_locals,poor_exp_vandalism_such_as_graffiti_tagging_broken_windows_in_shops_and_public_buildings
 GEN24_1000426,1 - Never,1 - Never,1 - Never,NA,1 - Never,1 - Never,1 - Never
 GEN24_1000430,1 - Never,1 - Never,1 - Never,1 - Never,2 - Sometimes,1 - Never,1 - Never
 GEN24_1000442,1 - Never,1 - Never,2 - Sometimes,1 - Never,2 - Sometimes,1 - Never,1 - Never

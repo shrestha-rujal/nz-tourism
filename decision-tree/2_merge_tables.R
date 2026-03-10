@@ -50,14 +50,16 @@ nz_visitors <- survey_main |>
   left_join(mobility, by = "response_id") |>
   left_join(other_countries, by = "response_id") |>
   mutate(across(c(
-    visited_other_countries, no_countries_visited,
-    visited_before, visited_after
+    other_countries_visited_other_countries,
+    other_countries_no_countries_visited,
+    other_countries_visited_before,
+    other_countries_visited_after
   ), ~ replace_na(., 0))) |>
   left_join(poor_experiences, by = "response_id") |>
   left_join(region_visits, by = "response_id") |>
   left_join(transport, by = "response_id") |>
   mutate(across(
-    c(app_based_services_such_as_uber_ola_etc:drove_themselves),
+    c(transport_app_based_services_such_as_uber_ola_etc:transport_drove_themselves),
     ~ replace_na(., 0)
   )) |>
   left_join(travel_party, by = "response_id")

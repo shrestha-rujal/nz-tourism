@@ -1,4 +1,4 @@
-response_id,region_wellington,region_otago,region_canterbury,region_auckland,region_bay_of_plenty,region_northland,region_manawatu_whanganui,region_southland,region_west_coast,region_tasman,region_waikato,region_hawkes_bay,region_marlborough,region_nelson,region_gisborne,region_taranaki
+response_id,itinerary_region_wellington,itinerary_region_otago,itinerary_region_canterbury,itinerary_region_auckland,itinerary_region_bay_of_plenty,itinerary_region_northland,itinerary_region_manawatu_whanganui,itinerary_region_southland,itinerary_region_west_coast,itinerary_region_tasman,itinerary_region_waikato,itinerary_region_hawkes_bay,itinerary_region_marlborough,itinerary_region_nelson,itinerary_region_gisborne,itinerary_region_taranaki
 GEN24_1000426,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 GEN24_1000430,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 GEN24_1000442,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0
