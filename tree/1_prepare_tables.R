@@ -17,6 +17,8 @@ expenditure <- read_csv("../data/expenditure_by_industry.csv")
 ease <- read_csv("../data/ease_of_organisation.csv")
 maori_experience <- read_csv("../data/maori_cultural_experience.csv")
 maori_sentiment <- read_csv("../data/maori_cultural_sentiment.csv")
+mobility <- read_csv("../data/mobility.csv")
+
 
 # filter only following columns
 survey_clean <- survey |>
@@ -788,3 +790,36 @@ maori_sentiment_processed <- maori_sentiment |>
 
 # write_csv(maori_sentiment_processed, "output/maori_sentiment_processed.csv")
 # saveRDS(maori_sentiment_processed, "output/maori_sentiment_processed.rds")
+
+
+
+##################################################
+# EASE OF MOBILITY
+##################################################
+
+mobility |> count(rating)
+
+# 170      1 - Cannot do at all
+# 553      2 - A lot of difficulty
+# 7195     3 - Some difficulty
+# 85434    4 - No difficulty
+# 1532     Prefer not to say
+
+mobility_processed <- mobility |>
+  mutate(
+    rating = ifelse(rating == "Prefer not to say", NA, rating),
+    rating = factor(rating, levels = c(
+      "1 - Cannot do at all",
+      "2 - A lot of difficulty",
+      "3 - Some difficulty",
+      "4 - No difficulty"
+    ), ordered = TRUE)
+  ) |>
+  pivot_wider(
+    names_from = mobility_difficulty,
+    values_from = rating
+  ) |>
+  janitor::clean_names()
+
+# write_csv(mobility_processed, "output/mobility_processed.csv")
+# saveRDS(mobility_processed, "output/mobility_processed.rds")
