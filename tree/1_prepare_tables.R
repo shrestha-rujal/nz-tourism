@@ -564,9 +564,6 @@ survey_clean_age |>
   ) |>
   arrange(desc(na_count))
 
-# saveRDS(survey_clean_age, "output/survey_cleaned.rds")
-# write_csv(survey_clean_age, "output/survey_cleaned.csv")
-
 
 #########################
 # ACCOMODATION
@@ -897,3 +894,22 @@ satisfaction_clean <- satisfaction |>
   )
 
 # write_csv(satisfaction_clean, "output/satisfaction_clean.csv")
+
+
+
+##################################################
+# EXPENDITURE
+##################################################
+
+expenditure_cleaned <- expenditure |>
+  select(-starts_with("exc_"))
+
+# write_csv(expenditure_cleaned, "output/expenditure_cleaned.csv")
+
+
+
+
+
+
+# saveRDS(survey_clean_age, "output/survey_cleaned.rds")
+# write_csv(survey_clean_age, "output/survey_cleaned.csv")
