@@ -20,7 +20,6 @@ maori_sentiment <- read_csv("../data/maori_cultural_sentiment.csv")
 mobility <- read_csv("../data/mobility.csv")
 other_countries <- read_csv("../data/other_countries_visited.csv")
 
-
 # filter only following columns
 survey_clean <- survey |>
   select(
@@ -983,10 +982,24 @@ activities_processed <- activities |>
 # write_csv(activities_processed, "output/activities_processed.csv")
 
 
+##################################################
+# SURVEY_MAIN FINAL CLEANUP
+##################################################
 
+survey_clean_age |>
+  count(arrival_method)
 
+# Auckland airport     18453
+# Christchurch airport  5370
+# Queenstown airport    2110
+# Some other airport      68
+# Wellington airport    1933
 
+survey_clean_final <- survey_clean_age |>
+  rename(
+    arrival_location = arrival_method,
+    departure_location = airport
+  )
 
-
-# saveRDS(survey_clean_age, "output/survey_cleaned.rds")
-# write_csv(survey_clean_age, "output/survey_cleaned.csv")
+# saveRDS(survey_clean_final, "output/survey_cleaned.rds")
+# write_csv(survey_clean_final, "output/survey_cleaned.csv")

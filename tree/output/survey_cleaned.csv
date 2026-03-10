@@ -1,4 +1,4 @@
-response_id,airport,country_of_residence,gender,first_nz_trip,arrival_method,arrival_date,no_days_in_nz,package_deal,age_range,travel_type,sustainability_considered,treated_spend,visit_purpose,arrival_month,arrival_year,arrival_season
+response_id,departure_location,country_of_residence,gender,first_nz_trip,arrival_location,arrival_date,no_days_in_nz,package_deal,age_range,travel_type,sustainability_considered,treated_spend,visit_purpose,arrival_month,arrival_year,arrival_season
 GEN24_1000426,Wellington,Australia,Male,No,Wellington airport,2022-07-01,10,No,45 - 49,Independent Traveller,Sometimes,649.9739167,To visit family,7,2022,Winter
 GEN24_1000430,Wellington,Australia,Male,No,Wellington airport,2022-06-18,23,No,45 - 49,Independent Traveller,Sometimes,1950,To visit family,6,2022,Winter
 GEN24_1000442,Christchurch,Australia,Male,No,Christchurch airport,2022-06-28,13,No,45 - 49,Independent Traveller,Not sure,947.10485,To visit friends,6,2022,Winter
