@@ -888,7 +888,7 @@ satisfaction_clean <- satisfaction |>
     recommend_rating = as.integer(str_extract(recommend_rating, "^\\d+"))
   )
 
-# write_csv(satisfaction_clean, "output/satisfaction_clean.csv")
+# write_csv(satisfaction_clean, "output/satisfaction_cleaned.csv")
 
 
 

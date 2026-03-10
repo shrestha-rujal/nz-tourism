@@ -1,7 +1,7 @@
 library(tidyverse)
 
 survey_main <- readRDS("output/survey_cleaned.rds")
-satisfaction <- read_csv("output/satisfaction_clean.csv")
+satisfaction <- read_csv("output/satisfaction_cleaned.csv")
 accommodation <- read_csv("output/accommodation_processed.csv")
 activities <- read_csv("output/activities_processed.csv")
 decision <- read_csv("output/decision_process_processed.csv")

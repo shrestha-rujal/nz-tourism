@@ -1,0 +1,37 @@
+Following changes to be made in nz_visitors to make it model ready
+The nz_visitors has many NA values due to left-joins, following comments helps
+remove them
+
+survey_main - remove treated_spend, arrival_date, arrival_month
+
+satisfaction - remove satisfaction and expectation 
+             - remove NA rows
+
+accomodation - remove NA rows
+
+activities - remove NA rows
+
+decision - remove NA rows
+
+ease - remove NA rows
+
+environment - left-joined, all good
+
+expenditure  - left-joined, all good
+
+maori_experience - remove NA rows
+
+maori_sentiment - remove NA rows
+
+mobility - left-joined, all good
+
+other_countries - left-joined and filled 0, all good
+
+poor_experiences - lef-joined, all good
+
+region_visits - remove NA rows
+
+transport - left-joined and filled 0, all good
+
+travel_party - left-joined, all good
+
