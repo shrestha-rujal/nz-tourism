@@ -877,3 +877,23 @@ poor_experiences_processed <- poor_exp |>
 
 # write_csv(poor_experiences_processed, "output/poor_experiences_processed.csv")
 # saveRDS(poor_experiences_processed, "output/poor_experiences_processed.rds")
+
+
+##################################################
+# VISITOR SATISFACTION
+##################################################
+
+satisfaction_clean <- satisfaction |>
+  filter(!is.na(recommend_rating)) |>
+  mutate(
+    satisfaction_rating = as.integer(str_extract(satisfaction_rating, "^\\d+")),
+    expectation_rating = ifelse(
+      expectation_rating == "Not sure",
+      NA,
+      expectation_rating
+    ),
+    expectation_rating = as.integer(str_extract(expectation_rating, "^\\d+")),
+    recommend_rating = as.integer(str_extract(recommend_rating, "^\\d+"))
+  )
+
+# write_csv(satisfaction_clean, "output/satisfaction_clean.csv")
