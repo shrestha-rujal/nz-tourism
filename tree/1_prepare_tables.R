@@ -15,6 +15,7 @@ itinerary <- read_csv("../data/itinerary.csv")
 travel_party <- read_csv("../data/travel_party.csv")
 expenditure <- read_csv("../data/expenditure_by_industry.csv")
 ease <- read_csv("../data/ease_of_organisation.csv")
+maori_experience <- read_csv("../data/maori_cultural_experience.csv")
 
 # filter only following columns
 survey_clean <- survey |>
@@ -736,3 +737,20 @@ environment_processed <- environment |>
 
 # write_csv(environment_processed, "output/environment_processed.csv")
 # saveRDS(environment_processed, "output/environment_processed.rds")
+
+
+##################################################
+# MAORI CULTURAL EXPERIENCE
+##################################################
+
+maori_experience_processed <- maori_experience |>
+  mutate(value = 1) |>
+  pivot_wider(
+    names_from = experience,
+    values_from = value,
+    values_fill = 0,
+    values_fn = max
+  ) |>
+  janitor::clean_names()
+
+# write_csv(maori_experience_processed, "output/maori_experience_processed.csv")
