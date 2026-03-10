@@ -908,6 +908,83 @@ expenditure_cleaned <- expenditure |>
 
 
 
+##################################################
+# ACTIVITIES
+##################################################
+
+activities |>
+  count(activity)
+
+# 13591     A beach
+# 909       A casino
+# 6278      A film location, tour or experience
+# 7129      A geothermal park (hot mud and possibly geysers)
+# 6023      A glacier e.g. Fox, Franz Josef, Hooker Valley
+# 1483      A live performance of dance
+# 2047      A live performance of music
+# 4153      A marine park or marine reserve
+# 34626     A national park
+# 6652      A place that is significant to Maori, such as a landmark, remains of a Maori pa (fortified hill), etc
+# 384       A play / drama
+# 17396     A public museum or art gallery
+# 4860      A wildlife sanctuary (a sanctuary for New Zealand's endangered species)
+# 1061      Air activities such as paragliding, hang gliding, ballooning, skydiving
+# 5799      Brewery, Gin, Vineyard / wine trail
+# 689       Bungy jumping
+# 493       Canyon Swing / canyoning
+# 2521      Cycling
+# 2256      Extreme ride e.g. Luge, fly-by-wire, zorbing, flying fox/zip-lining
+# 4162      Farm or orchard
+# 979       Fishing
+# 2248      Food and/or wine/alcohol event or festival
+# 4819      Garden visit or flower show
+# 5113      Glow worm tour
+# 2426      Health spa or day spa
+# 524       Horse riding / horse trekking
+# 6204      Hot pools
+# 159       Hunting
+# 2297      Jet-boating
+# 1321      Mountain climbing, rock climbing, abseiling, caving
+# 32727     None of these
+# 1089      Not sure
+# 3306      Other boating
+# 2037      Other exhibition / Expo
+# 4351      Other important building or site
+# 1506      Other live performance
+# 15402     Other natural attraction (e.g. mountain, lake, river, forest, etc.)
+# 2217      Other themed experience (e.g. All Blacks Experience, Antarctic Centre)
+# 602       Other water activity such as water-skiing, sailing
+# 788       Playing golf
+# 493       Quad biking, 4WD vehicle tour
+# 2393      Rafting, canoeing, kayaking
+# 613       Scuba diving or snorkelling
+# 1035      Skiing, snowboarding, sledging or other snow sport
+# 2060      Stargazing
+# 4908      Swimming / surfing
+# 563       Swimming with seals or dolphins
+# 2018      Theme park or leisure park
+# 5478      Top-end restaurants
+# 3836      Trip to watch whales, penguins or dolphins
+# 1948      Watching or playing some sport
+# 25738     Went for a walk, hike, trek or tramp
+# 3769      Zoo or wildlife park
+
+activities_processed <- activities |>
+  select(-subtype, -category) |>
+  filter(!activity %in% c("None of these", "Not sure")) |>
+  mutate(value = 1) |>
+  pivot_wider(
+    names_from = activity,
+    values_from = value,
+    values_fill = 0,
+    values_fn = max
+  )
+
+# write_csv(activities_processed, "output/activities_processed.csv")
+
+
+
+
 
 
 
