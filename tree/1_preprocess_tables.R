@@ -258,15 +258,6 @@ transport |>
 # 199    Motorcycle
 # 157    Not sure
 
-transport_oh <- transport |>
-  mutate(value = 1) |>
-  pivot_wider(
-    names_from = transport_method,
-    values_from = value,
-    values_fill = 0
-  ) |>
-  janitor::clean_names()
-
 self_transport |>
   count(drive_yourself) |>
   arrange(desc(n))
@@ -278,16 +269,21 @@ self_transport |>
 dim(self_transport)
 # 18,941 rows
 
+transport_oh <- transport |>
+  filter(transport_method != "Not sure") |>
+  mutate(value = 1) |>
+  pivot_wider(
+    names_from = transport_method,
+    values_from = value,
+    values_fill = 0,
+    values_fn = max
+  ) |>
+  janitor::clean_names()
+
 self_transport_clean <- self_transport |>
   distinct(response_id, drive_yourself) |>
   mutate(drove_themselves = as.integer(drive_yourself == "Yes")) |>
   select(response_id, drove_themselves)
-
-dim(self_transport_clean)
-# 17,786 rows
-
-dim(transport_oh)
-# 23,356 rows
 
 transport_total <- transport_oh |>
   left_join(self_transport_clean, by = "response_id") |>
@@ -977,7 +973,8 @@ activities_processed <- activities |>
     values_from = value,
     values_fill = 0,
     values_fn = max
-  )
+  ) |>
+  janitor::clean_names()
 
 # write_csv(activities_processed, "output/activities_processed.csv")
 
