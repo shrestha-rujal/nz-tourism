@@ -16,6 +16,7 @@ travel_party <- read_csv("../data/travel_party.csv")
 expenditure <- read_csv("../data/expenditure_by_industry.csv")
 ease <- read_csv("../data/ease_of_organisation.csv")
 maori_experience <- read_csv("../data/maori_cultural_experience.csv")
+maori_sentiment <- read_csv("../data/maori_cultural_sentiment.csv")
 
 # filter only following columns
 survey_clean <- survey |>
@@ -754,3 +755,36 @@ maori_experience_processed <- maori_experience |>
   janitor::clean_names()
 
 # write_csv(maori_experience_processed, "output/maori_experience_processed.csv")
+
+
+##################################################
+# MAORI CULTURAL SENTIMENT
+##################################################
+
+maori_sentiment_processed <- maori_sentiment |>
+  mutate(
+    experience_more_maori_culture = factor(experience_more_maori_culture,
+      levels = c("Disagree", "Don't know / Not sure", "Agree"),
+      ordered = TRUE
+    ),
+    improve_maori_culture_understanding = ifelse(
+      improve_maori_culture_understanding == "Don't know / Not sure",
+      NA, improve_maori_culture_understanding
+    ),
+    improve_maori_culture_understanding = factor(
+      improve_maori_culture_understanding,
+      levels = c("Disagree", "Agree"),
+      ordered = TRUE
+    ),
+    enjoy_maori_culture_experience = ifelse(
+      enjoy_maori_culture_experience == "Don't know / Not sure",
+      NA, enjoy_maori_culture_experience
+    ),
+    enjoy_maori_culture_experience = factor(enjoy_maori_culture_experience,
+      levels = c("Disagree", "Agree"),
+      ordered = TRUE
+    )
+  )
+
+# write_csv(maori_sentiment_processed, "output/maori_sentiment_processed.csv")
+# saveRDS(maori_sentiment_processed, "output/maori_sentiment_processed.rds")
