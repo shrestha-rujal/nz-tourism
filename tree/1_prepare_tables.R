@@ -841,3 +841,39 @@ other_countries_processed <- other_countries |>
   )
 
 # write_csv(other_countries_processed, "output/other_countries_processed.csv")
+
+
+##################################################
+# POOR EXPERIENCES
+##################################################
+
+
+poor_exp |> count(frequency)
+
+# 99309    1 - Never
+# 42582    2 - Sometimes
+# 3305     3 - Most of the times
+# 979      4 - Always
+# 7286     Don't know/ Not applicable
+
+
+poor_experiences_processed <- poor_exp |>
+  mutate(
+    frequency = ifelse(
+      frequency == "Don't know/ Not applicable", NA, frequency
+    ),
+    frequency = factor(frequency, levels = c(
+      "1 - Never",
+      "2 - Sometimes",
+      "3 - Most of the times",
+      "4 - Always"
+    ), ordered = TRUE)
+  ) |>
+  pivot_wider(
+    names_from = type,
+    values_from = frequency
+  ) |>
+  janitor::clean_names()
+
+# write_csv(poor_experiences_processed, "output/poor_experiences_processed.csv")
+# saveRDS(poor_experiences_processed, "output/poor_experiences_processed.rds")
