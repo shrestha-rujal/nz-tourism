@@ -45,7 +45,7 @@ for (table in tables_to_check) {
 }
 
 dim(nz_visitors) # 27934
-dim(model_data) # 19607
+dim(model_data) # 19239
 
 # write_csv(model_data, "output/merged/model_data.csv")
 # saveRDS(model_data, "output/merged/model_data.rds")
@@ -79,7 +79,23 @@ reco_tree_model_data <- tree_model_data |>
   filter(!is.na(recommend_rating))
 
 dim(reco_tree_model_data)
-# 19607 * 201
+# 19239 * 201
 
 # write_csv(reco_tree_model_data, "output/merged/reco_tree_model_data.csv")
 # saveRDS(reco_tree_model_data, "output/merged/reco_tree_model_data.rds")
+
+
+# now only columns specifically relevant for satisfaction_tree_model
+
+satisfaction_tree_model_data <- tree_model_data |>
+  select(
+    -treated_spend,
+    -recommend_rating
+  ) |>
+  filter(!is.na(satisfaction_rating))
+
+dim(satisfaction_tree_model_data)
+# 19239 * 201
+
+# write_csv(satisfaction_tree_model_data, "output/merged/satisfaction_tree_model_data.csv")
+# saveRDS(satisfaction_tree_model_data, "output/merged/satisfaction_tree_model_data.rds")
