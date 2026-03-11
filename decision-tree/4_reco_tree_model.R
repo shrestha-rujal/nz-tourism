@@ -23,7 +23,6 @@ plot_tree <- function(model) {
     ))
 }
 
-
 df <- readRDS("output/merged/reco_tree_model_data.rds")
 
 # hotfix
@@ -51,6 +50,10 @@ cat("Optimal cp:", optimal_cp, "\n")
 # prune
 tree_pruned <- prune(tree_model_full, cp = optimal_cp)
 
+#####################
+# PLOTTINGS
+#####################
+
 # plot cp chart
 # png("results/plots/cost_parameter_plot.png", width = 1200, height = 600)
 # plotcp(tree_model_full)
@@ -60,7 +63,10 @@ tree_pruned <- prune(tree_model_full, cp = optimal_cp)
 p <- plot_tree(tree_pruned)
 # saveWidget(p, "results/plots/decision_tree.html")
 
-# For calculating MSE
+
+#####################
+# MSE
+#####################
 
 # use full data for the final model (stable cp)
 # use train/test split just to report MSE
@@ -81,3 +87,30 @@ tree_preds <- predict(tree_test, test_data)
 mse <- mean((test_data$recommend_rating - tree_preds)^2)
 cat("Test MSE:", mse, "\n")
 # 1.3998
+
+
+##########################################
+# ANALYSIS OF PREDICTORS
+##########################################
+
+importance_df <- data.frame(
+  variable = names(tree_pruned$variable.importance),
+  importance = tree_pruned$variable.importance
+) |>
+  arrange(desc(importance))
+
+p_importance <- ggplot(
+  importance_df |> filter(importance >= 1),
+  aes(x = reorder(variable, importance), y = importance)
+) +
+  geom_col(fill = "steelblue") +
+  coord_flip() +
+  # scale_y_log10() +
+  labs(
+    title = "Variable Importance from Pruned Decision Tree",
+    x = "Variable",
+    y = "Importance (log scale)"
+  ) +
+  theme_minimal(base_size = 16)
+
+# ggsave("results/plots/variable_importance.jpg", dpi = 300)
