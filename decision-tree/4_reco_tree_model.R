@@ -61,8 +61,7 @@ tree_pruned <- prune(tree_model_full, cp = optimal_cp)
 
 # plot tree
 p <- plot_tree(tree_pruned)
-# saveWidget(p, "results/plots/decision_tree.html")
-
+# saveWidget(p, "results/plots/decision_tree.html", selfcontained = FALSE)
 
 #####################
 # MSE
