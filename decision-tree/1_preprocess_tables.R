@@ -1,6 +1,7 @@
 library(tidyverse)
 
-setwd("/Users/rujalshrestha/Projects/nz-tourism/decision-tree")
+getwd()
+setwd("/home/rujal/Projects/nz-tourism/decision-tree")
 
 survey <- read_csv("../data/survey_main_header.csv")
 decision <- read_csv("../data/decision_making_process.csv")
@@ -68,7 +69,6 @@ survey_clean <- survey |>
 # map places stayed into regions
 
 region_mapping <- list(
-
   # NORTH ISLAND
   region_northland = c(
     "Far North District",
@@ -199,7 +199,6 @@ dim(region_visits)
 
 # output to file
 # write_csv(region_visits, "output/region_visits_processed.csv")
-
 
 
 #########################
@@ -345,8 +344,8 @@ survey |>
   count(purpose_subtype) |>
   arrange(desc(n))
 
-survey_clean %>%
-  count(purpose_subtype) %>%
+survey_clean |>
+  count(purpose_subtype) |>
   arrange(n)
 
 # create new visit_purpose column using purpose_subtype
@@ -616,7 +615,6 @@ accommodation_processed <- accommodation |>
 # write_csv(accommodation_processed, "output/accommodation_processed.csv")
 
 
-
 #########################
 # DECISION MAKING PROCESS
 #########################
@@ -670,7 +668,6 @@ decision_processed <- decision |>
 # write_csv(decision_processed, "output/decision_process_processed.csv")
 
 
-
 #########################
 # EASE OF ORGANIZATION
 #########################
@@ -698,7 +695,6 @@ ease_cleaned <- ease |>
 
 # write_csv(ease_cleaned, "output/ease_cleaned.csv")
 # saveRDS(ease_cleaned, "output/ease_cleaned.rds")
-
 
 
 #########################
@@ -792,7 +788,6 @@ maori_sentiment_processed <- maori_sentiment |>
 # saveRDS(maori_sentiment_processed, "output/maori_sentiment_processed.rds")
 
 
-
 ##################################################
 # EASE OF MOBILITY
 ##################################################
@@ -824,7 +819,6 @@ mobility_processed <- mobility |>
 
 # write_csv(mobility_processed, "output/mobility_processed.csv")
 # saveRDS(mobility_processed, "output/mobility_processed.rds")
-
 
 
 ##################################################
@@ -901,7 +895,6 @@ satisfaction_clean <- satisfaction |>
 # write_csv(satisfaction_clean, "output/satisfaction_cleaned.csv")
 
 
-
 ##################################################
 # EXPENDITURE
 ##################################################
@@ -910,7 +903,6 @@ expenditure_cleaned <- expenditure |>
   select(-starts_with("exc_"))
 
 # write_csv(expenditure_cleaned, "output/expenditure_cleaned.csv")
-
 
 
 ##################################################
@@ -1011,3 +1003,109 @@ survey_clean_final <- survey_clean_age |>
 
 # saveRDS(survey_clean_final, "output/survey_cleaned.rds")
 # write_csv(survey_clean_final, "output/survey_cleaned.csv")
+
+
+#########################################################
+# COUNT NAs
+#########################################################
+
+tables <- list(
+  survey = survey,
+  decision = decision,
+  satisfaction = satisfaction,
+  accommodation = accommodation,
+  activities = activities,
+  transport = transport,
+  self_transport = self_transport,
+  poor_exp = poor_exp,
+  environment = environment,
+  itinerary = itinerary,
+  travel_party = travel_party,
+  expenditure = expenditure,
+  ease = ease,
+  maori_experience = maori_experience,
+  maori_sentiment = maori_sentiment,
+  mobility = mobility,
+  other_countries = other_countries
+)
+
+na_summary <- map_dfr(names(tables), function(tbl_name) {
+  df <- tables[[tbl_name]]
+  total_rows <- nrow(df)
+
+  map_dfr(names(df), function(col_name) {
+    na_rows <- sum(is.na(df[[col_name]]))
+    tibble(
+      table      = tbl_name,
+      column     = col_name,
+      total_rows = total_rows,
+      na_rows    = na_rows,
+      pct_na     = round(na_rows / total_rows * 100, 1)
+    )
+  })
+})
+
+na_summary |>
+  filter(na_rows > 0) |> # only show columns that have NAs
+  arrange(desc(pct_na)) |>
+  mutate(label = glue::glue("{table}${column} — {scales::comma(total_rows)} — {scales::comma(na_rows)} — {pct_na}%")) |>
+  pull(label) |>
+  cat(sep = "\n")
+
+
+na_data <- tribble(
+  ~table, ~column, ~total_rows, ~na_rows, ~pct_na,
+  "survey", "No. Nights Other Country", 29000, 28151, 97.1,
+  "survey", "Country Package Started", 29000, 26922, 92.8,
+  "survey", "Trip Start Country", 29000, 26922, 92.8,
+  "survey", "Incl. Stay Other Country", 29000, 26922, 92.8,
+  "activities", "Activity Subtype", 267479, 187275, 70.0,
+  "survey", "No. People Over 15", 29000, 15720, 54.2,
+  "survey", "Visited South Island", 29000, 13127, 45.3,
+  "survey", "Main Transport Type", 29000, 12178, 42.0,
+  "survey", "Visited North Island", 29000, 9427, 32.5,
+  "self_transport", "Driving Information", 18941, 5053, 26.7,
+  "survey", "Sustainability Considered", 29000, 6903, 23.8
+) |>
+  mutate(
+    # label = fct_reorder(paste0(table, "  ·  ", column), pct_na)
+    label = fct_reorder(paste0(column), pct_na)
+  )
+
+p_na <- ggplot(na_data, aes(x = pct_na, y = label, fill = pct_na)) +
+  geom_col(width = 0.7) +
+  geom_text(
+    aes(label = paste0(pct_na, "%  (", scales::comma(na_rows), ")")),
+    hjust = 1.05, size = 3, colour = "white", fontface = "bold"
+  ) +
+  scale_fill_gradient(
+    low = "#5B9BD5", # soft blue  — low NA
+    high = "#C0392B", # warm red   — high NA
+    name = "% Missing",
+    guide = "none"
+  ) +
+  scale_x_continuous(
+    limits = c(0, 120),
+    breaks = seq(0, 100, 25),
+    labels = scales::label_percent(scale = 1)
+  ) +
+  labs(
+    title    = "Columns with Missing Values Across IVS Tables",
+    x        = "% of rows with NA",
+    y        = NULL,
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(
+    plot.title         = element_text(face = "bold", size = 14, colour = "#1E293B"),
+    plot.subtitle      = element_text(size = 10, colour = "#64748B"),
+    plot.caption       = element_text(size = 9, colour = "#64748B"),
+    axis.text.y        = element_text(size = 11),
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor   = element_blank(),
+    # legend.position    = "bottom",
+    # legend.key.width   = unit(2, "cm")
+  )
+
+p_na
+
+# ggsave("results/plots/eda/na_summary_chart.png", p_na, width = 12, height = 7, dpi = 300)
