@@ -411,7 +411,6 @@ p13 <- p13_density / p13_box +
   plot_layout(heights = c(4, 1)) +
   plot_annotation(
     title = "How Long Do Visitors Stay in New Zealand?",
-    subtitle = "Capped at 90 days. Dashed line = median.",
     caption = "Source: IVS Microdata 2022–2025",
     theme = theme(
       plot.title    = element_text(face = "bold", size = 16),

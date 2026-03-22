@@ -1,6 +1,5 @@
 library(tidyverse)
 
-getwd()
 setwd("/home/rujal/Projects/nz-tourism/decision-tree")
 
 survey <- read_csv("../data/survey_main_header.csv")
@@ -1052,23 +1051,21 @@ na_summary |>
   pull(label) |>
   cat(sep = "\n")
 
-
 na_data <- tribble(
   ~table, ~column, ~total_rows, ~na_rows, ~pct_na,
-  "survey", "No. Nights Other Country", 29000, 28151, 97.1,
-  "survey", "Country Package Started", 29000, 26922, 92.8,
-  "survey", "Trip Start Country", 29000, 26922, 92.8,
-  "survey", "Incl. Stay Other Country", 29000, 26922, 92.8,
-  "activities", "Activity Subtype", 267479, 187275, 70.0,
+  "maori_sentiment", "Improve Maori Culture Understanding", 23116, 14204, 61.4,
+  "maori_sentiment", "Enjoy Maori Culture Experience", 23116, 14204, 61.4,
+  "survey", "No. People Under 15", 29000, 15778, 54.4,
   "survey", "No. People Over 15", 29000, 15720, 54.2,
   "survey", "Visited South Island", 29000, 13127, 45.3,
   "survey", "Main Transport Type", 29000, 12178, 42.0,
   "survey", "Visited North Island", 29000, 9427, 32.5,
   "self_transport", "Driving Information", 18941, 5053, 26.7,
-  "survey", "Sustainability Considered", 29000, 6903, 23.8
+  "survey", "Sustainability Considered", 29000, 6903, 23.8,
+  "survey", "VEM Pop Weight", 29000, 3580, 12.3,
+  "survey", "Purpose Subtype", 29000, 1454, 5.0
 ) |>
   mutate(
-    # label = fct_reorder(paste0(table, "  ·  ", column), pct_na)
     label = fct_reorder(paste0(column), pct_na)
   )
 
@@ -1076,7 +1073,7 @@ p_na <- ggplot(na_data, aes(x = pct_na, y = label, fill = pct_na)) +
   geom_col(width = 0.7) +
   geom_text(
     aes(label = paste0(pct_na, "%  (", scales::comma(na_rows), ")")),
-    hjust = 1.05, size = 3, colour = "white", fontface = "bold"
+    hjust = -0.2, size = 4, colour = "#64748B", fontface = "bold"
   ) +
   scale_fill_gradient(
     low = "#5B9BD5", # soft blue  — low NA
@@ -1086,7 +1083,7 @@ p_na <- ggplot(na_data, aes(x = pct_na, y = label, fill = pct_na)) +
   ) +
   scale_x_continuous(
     limits = c(0, 120),
-    breaks = seq(0, 100, 25),
+    breaks = seq(0, 80, 25),
     labels = scales::label_percent(scale = 1)
   ) +
   labs(
@@ -1108,4 +1105,4 @@ p_na <- ggplot(na_data, aes(x = pct_na, y = label, fill = pct_na)) +
 
 p_na
 
-# ggsave("results/plots/eda/na_summary_chart.png", p_na, width = 12, height = 7, dpi = 300)
+ggsave("results/plots/eda/na_summary_chart.png", p_na, width = 12, height = 7, dpi = 300)
