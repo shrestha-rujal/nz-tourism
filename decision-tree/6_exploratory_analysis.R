@@ -3,6 +3,8 @@ library(forcats)
 library(scales)
 library(patchwork)
 library(sf)
+library(corrplot)
+library(fastDummies)
 
 # setwd(paste0(getwd(), "/decision-tree"))
 
@@ -599,7 +601,6 @@ cost_cols <- c(
   "cost_food_drink"    = "Food & Drink (Groceries)",
   "cost_entertainment" = "Entertainment",
   "cost_shopping"      = "Shopping",
-  "cost_tour_package"  = "Tour Package",
   "cost_dom_flights"   = "Domestic Flights",
   "cost_car_rentals"   = "Car Rentals",
   "cost_eating_out"    = "Eating Out",
@@ -617,14 +618,10 @@ p18 <- df |>
     median_spend = median(spend, na.rm = TRUE),
     .groups = "drop"
   ) |>
-  mutate(industry = fct_reorder(industry, mean_spend)) |>
-  ggplot(aes(x = industry, y = mean_spend)) +
+  mutate(industry = fct_reorder(industry, median_spend)) |>
+  ggplot(aes(x = industry, y = median_spend)) +
   geom_col(fill = "steelblue", alpha = 0.85) +
-  geom_point(aes(y = median_spend),
-    colour = "#d73027",
-    size = 3, shape = 18
-  ) +
-  geom_text(aes(label = dollar(round(mean_spend), prefix = "NZD ")),
+  geom_text(aes(label = dollar(round(median_spend), prefix = "NZD ")),
     hjust = -0.1, size = 3.5
   ) +
   coord_flip() +
@@ -633,7 +630,7 @@ p18 <- df |>
     expand = expansion(mult = c(0, 0.18))
   ) +
   labs(
-    title    = "Mean Spend by Industry Category",
+    title    = "Median Spend by Industry Category",
     subtitle = "Bars = mean. Red diamond = median (among those who spent > 0 in that category)",
     x        = NULL,
     y        = "Spend (NZD)",
@@ -643,10 +640,10 @@ p18 <- df |>
 
 p18
 
-ggsave(output_path("spend_by_industry.png"),
-  p18,
-  width = 12, height = 7, dpi = 300, bg = "white"
-)
+# ggsave(output_path("spend_by_industry.png"),
+#   p18,
+#   width = 12, height = 7, dpi = 300, bg = "white"
+# )
 
 
 # places stayed and spend most days - cholorpleths
@@ -782,12 +779,56 @@ p_ta_nights
 
 
 # ── save ───────────────────────────────────────────────────────────────────────
-ggsave(output_path("ta_choropleth_visitors.png"),
-  p_ta_visitors,
-  width = 9, height = 12, dpi = 300, bg = "white"
+# ggsave(output_path("ta_choropleth_visitors.png"),
+#   p_ta_visitors,
+#   width = 9, height = 12, dpi = 300, bg = "white"
+# )
+
+# ggsave(output_path("ta_choropleth_avg_nights.png"),
+#   p_ta_nights,
+#   width = 9, height = 12, dpi = 300, bg = "white"
+# )
+
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# CORRELATION ANALYSIS
+# ══════════════════════════════════════════════════════════════════════════════
+cor_matrix <- df |>
+  select(where(is.numeric)) |>
+  mutate(across(everything(), as.numeric)) |>
+  drop_na() |>
+  cor(use = "pairwise.complete.obs")
+
+high_cor_vars <- cor_matrix |>
+  as.data.frame() |>
+  rownames_to_column("var1") |>
+  pivot_longer(-var1, names_to = "var2", values_to = "r") |>
+  filter(var1 != var2, abs(r) > 0.65) |>
+  pull(var1) |>
+  unique()
+
+# step 3: subset matrix to only those variables
+cor_subset <- cor_matrix[high_cor_vars, high_cor_vars]
+
+# shorten column names before plotting
+colnames(cor_subset) <- abbreviate(colnames(cor_subset), minlength = 15)
+rownames(cor_subset) <- abbreviate(rownames(cor_subset), minlength = 15)
+
+png(output_path("corr_plot.png"), width = 2400, height = 2000, res = 150)
+
+corrplot(
+  cor_subset,
+  method      = "color",
+  type        = "lower",
+  addCoef.col = "black",
+  number.cex  = 1.6,
+  tl.cex      = 1.6,
+  tl.col      = "black",
+  tl.srt      = 45,
+  col         = colorRampPalette(c("#C0392B", "white", "#2471A3"))(200),
+  title       = "Highly Correlated Variables (|r| > 0.65)",
+  mar         = c(0, 0, 2, 0)
 )
 
-ggsave(output_path("ta_choropleth_avg_nights.png"),
-  p_ta_nights,
-  width = 9, height = 12, dpi = 300, bg = "white"
-)
+dev.off()
