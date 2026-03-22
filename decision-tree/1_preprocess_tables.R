@@ -66,6 +66,7 @@ survey_clean <- survey |>
   )
 
 # map places stayed into regions
+# 69 places
 
 region_mapping <- list(
   # NORTH ISLAND

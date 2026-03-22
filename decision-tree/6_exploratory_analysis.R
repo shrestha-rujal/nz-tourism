@@ -5,6 +5,7 @@ library(patchwork)
 library(sf)
 library(corrplot)
 library(fastDummies)
+library(ggrepel)
 
 # setwd(paste0(getwd(), "/decision-tree"))
 
@@ -219,7 +220,6 @@ p9 <- df |>
   scale_x_log10(labels = dollar_format(prefix = "NZD ")) +
   labs(
     title    = "Distribution of Visitor Spending (KDE)",
-    subtitle = "Log scale — right tail shows high-spending outliers",
     x        = "Total Treated Spend (NZD, log scale)",
     y        = "Density",
     caption  = "Source: IVS Microdata 2022–2025"
@@ -311,7 +311,6 @@ p11 <- df |>
   ) +
   labs(
     title    = "Median Visitor Spend by Country of Origin (Top 12)",
-    subtitle = "Countries ranked by number of respondents",
     x        = NULL,
     y        = "Median Spend (NZD)",
     caption  = "Source: IVS Microdata 2022–2025"
@@ -359,14 +358,19 @@ p12 <- df |>
   scale_y_continuous(labels = comma_format()) +
   labs(
     title    = "Visitor Counts by Country of Origin, Split by Gender (Top 10)",
-    subtitle = "Bar height = total visitors. Labels = gender % within each country.",
     x        = NULL,
     y        = "Number of Respondents",
     fill     = "Gender",
     caption  = "Source: IVS Microdata 2022–2025"
   ) +
   theme_ivs() +
-  theme(legend.position = "bottom")
+  theme(
+    legend.position   = c(0.8, 0.7), # inside bottom-right, adjust as needed
+    legend.background = element_rect(fill = "white", colour = "grey80", linewidth = 0.3),
+    legend.title      = element_blank(),
+    legend.key.size   = unit(1, "cm"),
+    legend.text       = element_text(size = 15)
+  )
 
 p12
 
@@ -630,7 +634,6 @@ p18 <- df |>
   ) +
   labs(
     title    = "Median Spend by Industry Category",
-    subtitle = "Bars = mean. Red diamond = median (among those who spent > 0 in that category)",
     x        = NULL,
     y        = "Spend (NZD)",
     caption  = "Source: IVS Microdata 2022–2025"
@@ -700,6 +703,22 @@ ta_avg_nights <- itinerary |>
     .groups = "drop"
   )
 
+top_visitors <- ta_map_visitors |>
+  slice_max(visitor_count, n = 4) |>
+  mutate(centroid = sf::st_centroid(geometry)) |>
+  mutate(
+    lon = sf::st_coordinates(centroid)[, 1],
+    lat = sf::st_coordinates(centroid)[, 2]
+  )
+
+top_nights <- ta_map_nights |>
+  slice_max(mean_nights, n = 4) |>
+  mutate(centroid = sf::st_centroid(geometry)) |>
+  mutate(
+    lon = sf::st_coordinates(centroid)[, 1],
+    lat = sf::st_coordinates(centroid)[, 2]
+  )
+
 # ── join to cleaned shapefile ─────────────────────────────────────────────────
 ta_map_visitors <- ta_shp_clean |>
   left_join(ta_visitor_counts, by = c("join_name" = "ta_name"))
@@ -725,6 +744,19 @@ if (length(unmatched_n) > 0) message("Unmatched (nights):   ", paste(unmatched_n
 
 p_ta_visitors <- ggplot(ta_map_visitors) +
   geom_sf(aes(fill = visitor_count), colour = "white", linewidth = 0.2) +
+  geom_label_repel(
+    data = top_visitors,
+    aes(x = lon, y = lat, label = paste0(join_name, "\n", comma(visitor_count))),
+    size = 5,
+    fill = "white",
+    colour = "#08306b",
+    label.size = 0.2,
+    segment.colour = "grey50",
+    seed = 42,
+    nudge_x = 2,
+    nudge_y = 1,
+    min.segment.length = 5
+  ) +
   scale_fill_gradientn(
     colours  = c("#f7fbff", "#c6dbef", "#6baed6", "#2171b5", "#08306b"),
     na.value = "grey90",
@@ -753,6 +785,19 @@ p_ta_visitors <- ggplot(ta_map_visitors) +
 
 p_ta_nights <- ggplot(ta_map_nights) +
   geom_sf(aes(fill = mean_nights), colour = "white", linewidth = 0.2) +
+  geom_label_repel(
+    data = top_nights,
+    aes(x = lon, y = lat, label = paste0(join_name, "\n", round(mean_nights, 1), " nights")),
+    size = 5,
+    fill = "white",
+    colour = "#7f0000",
+    label.size = 0.2,
+    segment.colour = "grey50",
+    seed = 42,
+    nudge_x = 2,
+    nudge_y = 1,
+    min.segment.length = 0
+  ) +
   scale_fill_gradientn(
     colours  = c("#fff7ec", "#fdd49e", "#fc8d59", "#d7301f", "#7f0000"),
     na.value = "grey90",
