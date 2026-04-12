@@ -16,12 +16,6 @@ output_path <- function(filename) {
   paste0(output_dir, filename)
 }
 
-X11()
-
-# hotfix (same as in script 4)
-df <- df |>
-  mutate(country_of_residence = fct_lump_min(country_of_residence, min = 10))
-
 # ── Common theme ───────────────────────────────────────────────────────────────
 theme_ivs <- function() {
   theme_minimal(base_size = 14) +

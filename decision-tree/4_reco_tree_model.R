@@ -25,12 +25,6 @@ plot_tree <- function(model) {
 
 df <- readRDS("output/merged/reco_tree_model_data.rds")
 
-# hotfix
-# @TODO: move to step 1 file
-df <- df |>
-  mutate(country_of_residence = fct_lump_min(country_of_residence, min = 10))
-
-
 set.seed(123)
 
 tree_model_full <- rpart(recommend_rating ~ .,

@@ -1,6 +1,6 @@
 library(tidyverse)
 
-setwd("/home/rujal/Projects/nz-tourism/decision-tree")
+# setwd(paste0(getwd(), "/decision-tree"))
 
 survey <- read_csv("../data/survey_main_header.csv")
 decision <- read_csv("../data/decision_making_process.csv")
@@ -423,7 +423,7 @@ summary(spend_analysis$treated_spend)
 #  5.338   1,701.272   3,355.218   4,853.544   6,160.786   114,675.376
 
 # plot to see treated_spend distribution
-spend_analysis |>
+treated_spend_distribution <- spend_analysis |>
   ggplot(aes(x = treated_spend)) +
   geom_histogram(bins = 50) +
   scale_x_log10() +
@@ -999,7 +999,8 @@ survey_clean_final <- survey_clean_age |>
   rename(
     arrival_location = arrival_method,
     departure_location = airport
-  )
+  ) |>
+  mutate(country_of_residence = fct_lump_min(country_of_residence, min = 10))
 
 # saveRDS(survey_clean_final, "output/survey_cleaned.rds")
 # write_csv(survey_clean_final, "output/survey_cleaned.csv")
@@ -1104,6 +1105,6 @@ p_na <- ggplot(na_data, aes(x = pct_na, y = label, fill = pct_na)) +
     # legend.key.width   = unit(2, "cm")
   )
 
-p_na
+# p_na
 
-ggsave("results/plots/eda/na_summary_chart.png", p_na, width = 12, height = 7, dpi = 300)
+# ggsave("results/plots/eda/na_summary_chart.png", p_na, width = 12, height = 7, dpi = 300)
