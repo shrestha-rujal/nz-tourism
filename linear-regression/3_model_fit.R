@@ -83,7 +83,7 @@ cat("  → Baseline predicted spending (all predictors = 0)\n\n")
 # Show a few example interpretations
 signif_coefs <- coef_table |>
   filter(p.value < 0.05, term != "(Intercept)") |>
-  slice_head(n = 3)
+  slice_head(n = 20)
 
 for (i in 1:nrow(signif_coefs)) {
   coef_name <- signif_coefs$term[i]

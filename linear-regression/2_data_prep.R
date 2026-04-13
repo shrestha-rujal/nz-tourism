@@ -30,7 +30,7 @@ key_cols <- c(
 )
 
 df_clean <- df |>
-  select(any_of(c(key_cols, colnames(df)[str_starts(colnames(df), c("activity_", "accomm_", "transport_", "decision_"))]))) |>
+  select(any_of(c(key_cols, colnames(df)[str_starts(colnames(df), "activity_|accomm_|transport_|decision_")]))) |>
   drop_na()
 
 rows_dropped <- nrow(df) - nrow(df_clean)
@@ -101,31 +101,68 @@ cat("Sample size:", nrow(X), "\n\n")
 
 cat("Checking Variance Inflation Factor (VIF)...\n\n")
 
-# Create temporary lm model to calculate VIF
-temp_model <- lm(y ~ ., data = X)
+# Use tryCatch to handle aliased coefficients gracefully
+vif_result <- tryCatch({
+  temp_model <- lm(y ~ ., data = X)
+  vif(temp_model)
+}, error = function(e) {
+  cat("⚠️  VIF calculation failed due to perfect collinearity.\n")
+  cat("    Attempting to identify and remove problematic columns...\n\n")
+  
+  # Identify columns to keep: non-numeric OR numeric with variance > 0
+  numeric_cols <- sapply(X, is.numeric)
+  keep_cols <- logical(length(numeric_cols))
+  
+  for (i in seq_along(keep_cols)) {
+    if (!numeric_cols[i]) {
+      keep_cols[i] <- TRUE  # Keep all non-numeric columns
+    } else {
+      keep_cols[i] <- sd(X[[i]], na.rm = TRUE) > 0  # Keep numeric if variance > 0
+    }
+  }
+  
+  X_filtered <- X[, keep_cols]
+  
+  # Try refitting
+  tryCatch({
+    temp_model <- lm(y ~ ., data = X_filtered)
+    X <<- X_filtered  # Update X globally
+    vif(temp_model)
+  }, error = function(e2) {
+    cat("    Could not resolve via variance filtering.\n")
+    cat("    Defaulting to basic model diagnostics (skipping VIF).\n")
+    return(NULL)
+  })
+})
 
-vif_values <- vif(temp_model)
-
-# Identify problematic variables
-high_vif <- vif_values[vif_values > 10]
-
-if (length(high_vif) > 0) {
-  cat("⚠️  Variables with VIF > 10 (high multicollinearity):\n")
-  print(high_vif)
-  cat("\nNote: These may need to be dropped or combined.\n")
+if (!is.null(vif_result)) {
+  vif_values <- vif_result
+  
+  # Identify problematic variables
+  high_vif <- vif_values[vif_values > 10]
+  
+  if (length(high_vif) > 0) {
+    cat("⚠️  Variables with VIF > 10 (high multicollinearity):\n")
+    print(high_vif)
+    cat("\nNote: These may need to be dropped or combined.\n")
+  } else {
+    cat("✓ All variables have VIF <= 10 (acceptable)\n")
+  }
+  
+  # VIF summary
+  vif_df <- tibble(
+    variable = names(vif_values),
+    vif = as.numeric(vif_values)
+  ) |>
+    arrange(desc(vif))
+  
+  cat("\nTop 15 highest VIF values:\n")
+  print(head(vif_df, 15))
 } else {
-  cat("✓ All variables have VIF <= 10 (acceptable)\n")
+  # If VIF failed, create empty VIF dataframe
+  vif_df <- tibble(variable = colnames(X), vif = NA_real_)
+  cat("✓ Proceeding with modeling (VIF skipped due to perfect collinearity)\n")
 }
-
-# VIF summary
-vif_df <- tibble(
-  variable = names(vif_values),
-  vif = as.numeric(vif_values)
-) |>
-  arrange(desc(vif))
-
-cat("\nTop 15 highest VIF values:\n")
-print(head(vif_df, 15))
 
 # ──────────────────────────────────────────────────────────────────────────────
 # 2.5 STANDARDIZATION (OPTIONAL - for comparing effect sizes)
@@ -134,11 +171,11 @@ print(head(vif_df, 15))
 cat("\n\nOptional: Creating standardized version of predictors...\n")
 
 X_standardized <- X |>
-  mutate(across(everything(), ~ (. - mean(., na.rm = TRUE)) / sd(., na.rm = TRUE)))
+  mutate(across(where(is.numeric), ~ (. - mean(., na.rm = TRUE)) / sd(., na.rm = TRUE)))
 
 y_standardized <- (y - mean(y, na.rm = TRUE)) / sd(y, na.rm = TRUE)
 
-cat("✓ Standardized data ready (will use in robustness checks)\n\n")
+cat("✓ Standardized data ready (numeric columns only; will use in robustness checks)\n\n")
 
 # ──────────────────────────────────────────────────────────────────────────────
 # 2.6 TRAIN/TEST SPLIT (80/20)

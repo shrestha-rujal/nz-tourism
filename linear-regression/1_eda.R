@@ -4,7 +4,7 @@ library(corrplot)
 library(moments)
 library(car)
 
-setwd("/Users/rujalshrestha/Projects/nz-tourism/linear-regression")
+setwd("/home/rujal/Projects/nz-tourism/linear-regression")
 
 # ══════════════════════════════════════════════════════════════════════════════
 # PHASE 1-2: DATA LOADING, INSPECTION & EDA
@@ -106,13 +106,17 @@ p_log <- df |>
 
 # Boxplot to check outliers
 p_box <- df |>
-  ggplot(aes(y = treated_spend)) +
+  ggplot(aes(x = "", y = treated_spend)) +
   geom_boxplot(fill = "steelblue", alpha = 0.7) +
+  geom_jitter(width = 0.03, alpha = 0.3, size = 1) +
   labs(
     title = "Boxplot of Treated Spend (outliers shown)",
+    x = "",
     y = "Treated Spend (NZD)"
   ) +
   theme_minimal(base_size = 12)
+
+X11()
 
 print(p_hist)
 print(p_density)
@@ -258,6 +262,7 @@ for (var in continuous_vars) {
       ) +
       theme_minimal(base_size = 11)
     print(p)
+    ggsave(paste0("results/plots/bivariate_", var, ".png"), p, width = 8, height = 6, dpi = 300)
   }
 }
 
@@ -278,7 +283,7 @@ for (var in cat_vars) {
       ) +
       theme_minimal(base_size = 11) +
       theme(legend.position = "none")
-    print(p)
+    ggsave(paste0("results/plots/boxplot_", var, ".png"), p, width = 8, height = 6, dpi = 300)
   }
 }
 
@@ -295,6 +300,8 @@ numeric_cols <- df_features |>
 
 # Remove response variable from this check for now
 numeric_for_cor <- numeric_cols[numeric_cols != "treated_spend" & numeric_cols != "log_treated_spend"]
+
+print(numeric_for_cor)
 
 # Create correlation matrix
 cor_matrix <- df_features |>

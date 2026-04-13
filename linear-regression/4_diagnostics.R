@@ -43,13 +43,14 @@ p1 <- tibble(fitted = fitted_vals, resid = residuals) |>
   theme_minimal(base_size = 11)
 
 print(p1)
-
 # ──────────────────────────────────────────────────────────────────────────────
 # 4.2 Q-Q PLOT (Normality of Residuals)
 # ──────────────────────────────────────────────────────────────────────────────
 
-p2 <- tibble(sample = qqnorm(residuals, plot.it = FALSE)$x,
-             theoretical = qqnorm(residuals, plot.it = FALSE)$y) |>
+p2 <- tibble(
+  sample = qqnorm(residuals, plot.it = FALSE)$x,
+  theoretical = qqnorm(residuals, plot.it = FALSE)$y
+) |>
   ggplot(aes(sample = residuals)) +
   geom_qq(alpha = 0.5, size = 1) +
   geom_qq_line(colour = "red", linewidth = 1) +
@@ -160,9 +161,11 @@ influence_threshold <- 4 / nrow(X_train)
 influential_idx <- which(cooks_d > influence_threshold)
 
 cat(sprintf("Cook's Distance threshold: %.6f\n", influence_threshold))
-cat(sprintf("Number of influential points: %d (%.1f%%)\n",
-           length(influential_idx),
-           length(influential_idx) / nrow(X_train) * 100))
+cat(sprintf(
+  "Number of influential points: %d (%.1f%%)\n",
+  length(influential_idx),
+  length(influential_idx) / nrow(X_train) * 100
+))
 
 if (length(influential_idx) > 0) {
   cat("\nTop 10 most influential observations:\n")
