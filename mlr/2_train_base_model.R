@@ -1,10 +1,8 @@
 library(tidyverse)
 
-setwd("/home/rujal/Projects/nz-tourism/mlr")
+# setwd("/Users/rujalshrestha/Projects/nz-tourism/mlr")
 
 model_df <- readRDS("output/mlr_merged.rds")
-
-colnames(model_df)
 
 df <- model_df |>
   select(
@@ -12,6 +10,8 @@ df <- model_df |>
     -no_days_in_nz,
     -response_id
   )
+
+# saveRDS(df, "output/model_df.rds")
 
 set.seed(42)
 
@@ -38,7 +38,12 @@ cat("RMSE:", round(rmse_log, 4), "\n")
 cat("MAE :", round(mae_log, 4), "\n")
 cat("R2  :", round(r2_test, 4), "\n")
 
+# adj-r2: 0.5776
+# rmse: 0.6581
 full_summary <- summary(ols_full)
+
+full_summary
+
 coef_mat <- coef(full_summary)
 
 coef_table <- tibble(
@@ -59,5 +64,4 @@ coef_table |>
   filter(term != "(Intercept)") |>
   arrange(p_value) |>
   slice_head(n = 30) |>
-  arrange(desc(dollar_effect)) |>
-  View()
+  arrange(desc(dollar_effect))

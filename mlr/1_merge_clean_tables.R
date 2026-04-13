@@ -36,6 +36,11 @@ survey_cleaned <- survey |>
       first_nz_trip == "No" ~ 0L,
       TRUE ~ NA_integer_
     ),
+    gender = case_when(
+      gender %in% c("Another Gender", "Rather not say") ~ "other_or_unspecified",
+      TRUE ~ gender
+    ),
+    gender = forcats::fct_relevel(as.factor(gender), "Female"),
     log_treated_spend = log(treated_spend),
     log_days_in_nz = log(no_days_in_nz)
   ) |>
@@ -57,7 +62,7 @@ survey_cleaned <- survey |>
   janitor::clean_names() |>
   drop_na(package_deal)
 
-dim(survey_cleaned) # 27,638 * 80
+dim(survey_cleaned) # 27,638 * 79
 
 survey_merged <- survey_cleaned |>
   left_join(accommodation, by = "response_id") |>
