@@ -1,0 +1,99 @@
+# top 10 most impactful in both directions:
+
+   term                                         estimate      p_value dollar_effect
+ 1 age_range_50_54                                 0.505     1.32e-38         2250.
+ 2 log_days_in_nz                                  0.501     0                2225.
+ 3 age_range_55_59                                 0.475     1.19e-34         2082.
+ 4 age_range_40_44                                 0.472     5.38e-33         2063.
+ 5 age_range_65_69                                 0.466     1.01e-32         2032.
+ 6 age_range_60_64                                 0.461     7.04e-33         2002.
+ 7 age_range_45_49                                 0.439     1.25e-28         1886.
+ 8 age_range_70_74                                 0.378     4.78e-20         1569.
+ 9 country_of_residence_switzerland                0.357     1.52e-16         1469.
+10 age_range_35_39                                 0.346     5.70e-19         1413.
+
+   term                                          estimate     p_value dollar_effect
+ 1 visit_purpose_to_care_for_a_family_member_or…   -0.435    2.86e-25        -1206.
+ 2 visit_purpose_to_visit_family                   -0.322    2.88e-28         -943.
+ 3 visit_purpose_for_a_wedding_funeral_other_fa…   -0.314    1.34e-19         -923.
+ 4 accomm_staying_with_family_or_friends           -0.280    3.19e-74         -836.
+ 5 visit_purpose_to_visit_friends                  -0.274    8.11e-17         -819.
+ 6 country_of_residence_south_africa               -0.184    3.91e- 5         -574.
+ 7 maori_exp_none_of_these                         -0.181    7.06e-38         -566.
+ 8 visit_purpose_other                             -0.157    6.39e- 6         -496.
+ 9 transport_car_or_van_owned_by_you_family_fri…   -0.145    3.81e-23         -462.
+10 visit_purpose_visiting_friends_relatives_oth…   -0.136    1.78e- 2         -434.
+
+-------------------------------------------------------------------------------------------
+
+If current stay is 7 days
++1 day: about +237 NZD
++1 week (7 to 14): about +1,420 NZD
+
+If current stay is 10 days
++1 day: about +167 NZD
++1 week (10 to 17): about +1,042 NZD
+
+If current stay is 14 days
++1 day: about +120 NZD
++1 week (14 to 21): about +771 NZD
+
+If current stay is 21 days
++1 day: about +81 NZD
++1 week (21 to 28): about +530 NZD
+
+Package deal: +NZD 1,073
+US resident: +NZD 1,034
+England resident: +NZD 832
+Luxury accommodation: +NZD 728
+Rental car: +NZD 504
+Top-end restaurants: +NZD 438
+First NZ trip: +NZD 380
+Top spend decreases:
+
+Visit purpose: care for family/friend: -NZD 1,206
+Visit purpose: visit family: -NZD 943
+Stay with family/friends: -NZD 836
+Visit purpose: visit friends: -NZD 819
+Maori experience none of these: -NZD 566
+
+1. Strongest spend-up drivers (statistically very strong and practically large)
+
+Longer trips are the biggest lever: log_days_in_nz is very strong (p≈0).
+Important nuance: this is a log predictor. A 10% longer stay implies about 4.9% higher spend, not 65% per extra day.
+Package deals are a major uplift: about +31.4% spend (about +$1,073 at your baseline).
+Mid-to-older age bands spend much more than the omitted age reference: many 40-69 groups are roughly +55% to +66%.
+Premium trip style increases spend:
+Luxury accommodation about +21%.
+Top-end restaurants about +12.8%.
+Rental car about +14.7%.
+Some origin markets are strongly positive versus the reference country (for example US, England, Germany, Netherlands, Switzerland), many in +24% to +43% range.
+
+2. Strongest spend-down drivers
+
+Visiting friends/family motives reduce spending materially:
+Visit family about -27.5%.
+Wedding/funeral family occasion about -27.0%.
+Visit friends about -23.9%.
+Staying with family/friends reduces paid spend a lot: about -24.4%.
+Maori_exp_none_of_these is strongly negative: about -16.5% (about -$566).
+Some transport/accommodation/party indicators are also negative, but smaller magnitude.
+
+3. What is clearly not a useful predictor
+
+Gender is not important in your final model:
+gender_male p=0.146
+gender_other_or_unspecified p=0.981
+Many long-tail activity and itinerary dummies have weak significance and tiny effect sizes. Good candidates to de-emphasize in narrative.
+
+4. Storyline you can use in conclusions
+
+High spend profile: longer stays, package travelers, older cohorts, premium accommodation/food choices, and some high-value source markets.
+Lower spend profile: visitors whose purpose is mainly visiting family/friends and those staying with family/friends.
+Cultural engagement signal: visitors selecting no Maori cultural experiences tend to spend less overall.
+
+5. Two interpretation cautions (important)
+
+Coefficients are associative, not causal.
+For log_days_in_nz, do not use the file’s 65% figure as “per day effect.”
+Use elasticity framing (for example 10% longer stay → about 4.9% more spend).
