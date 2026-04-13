@@ -1,4 +1,5 @@
 library(tidyverse)
+library(caret)
 
 # setwd("/Users/rujalshrestha/Projects/nz-tourism/mlr")
 
@@ -29,19 +30,13 @@ ols_full <- lm(log_treated_spend ~ ., data = train_df)
 y_pred <- predict(ols_full, newdata = test_df)
 y_actual <- test_df$log_treated_spend
 
-rmse_log <- sqrt(mean((y_actual - y_pred)^2, na.rm = TRUE))
-mae_log <- mean(abs(y_actual - y_pred), na.rm = TRUE)
-r2_test <- 1 - sum((y_actual - y_pred)^2, na.rm = TRUE) / sum((y_actual - mean(y_actual, na.rm = TRUE))^2, na.rm = TRUE)
+# r2: 0.5639
+postResample(pred = y_pred, obs = y_actual)
 
-cat("\n=== Full OLS Baseline (Test Set, log scale) ===\n")
-cat("RMSE:", round(rmse_log, 4), "\n")
-cat("MAE :", round(mae_log, 4), "\n")
-cat("R2  :", round(r2_test, 4), "\n")
+full_summary <- summary(ols_full)
 
 # adj-r2: 0.5776
 # rmse: 0.6581
-full_summary <- summary(ols_full)
-
 full_summary
 
 coef_mat <- coef(full_summary)
@@ -49,6 +44,8 @@ coef_mat <- coef(full_summary)
 coef_table <- tibble(
   term = rownames(coef_mat),
   estimate = coef_mat[, 1],
+  std_error = coef_mat[, 2],
+  t_value = coef_mat[, 3],
   p_value = coef_mat[, 4]
 )
 
@@ -59,6 +56,20 @@ coef_table <- coef_table |>
     percent_effect = (exp(estimate) - 1) * 100,
     dollar_effect = baseline_spend * (exp(estimate) - 1)
   )
+
+coef_table_export <- coef_table |>
+  arrange(p_value)
+
+coef_top30_export <- coef_table_export |>
+  filter(term != "(Intercept)") |>
+  slice_head(n = 30) |>
+  arrange(desc(dollar_effect))
+
+write_csv(coef_table_export, "output/ols_coefficients_full.csv")
+write_csv(coef_top30_export, "output/ols_coefficients_top30.csv")
+
+cat("Saved: output/ols_coefficients_full.csv")
+cat("Saved: output/ols_coefficients_top30.csv")
 
 coef_table |>
   filter(term != "(Intercept)") |>

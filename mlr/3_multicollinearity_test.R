@@ -1,5 +1,7 @@
 library(car)
 library(tidyverse)
+library(glmnet)
+library(tibble)
 
 df <- readRDS("output/model_df.rds")
 
@@ -13,6 +15,7 @@ test_df <- df[-train_idx, ]
 
 ols_full <- lm(log_treated_spend ~ ., data = train_df)
 
+# VIF TEST
 raw_vif <- car::vif(ols_full)
 
 vif_tbl <- if (is.matrix(raw_vif)) {
