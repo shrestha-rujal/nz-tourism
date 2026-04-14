@@ -39,6 +39,10 @@ full_summary <- summary(ols_full)
 # rmse: 0.6581
 full_summary
 
+# sink("mlr_summary.txt")
+# print(full_summary)
+# sink()
+
 coef_mat <- coef(full_summary)
 
 coef_table <- tibble(

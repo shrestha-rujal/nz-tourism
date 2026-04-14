@@ -83,7 +83,7 @@ survey_merged <- survey_cleaned |>
   mutate(across(starts_with("transport_"), ~ replace_na(., 0))) |>
   left_join(travel_party, by = "response_id")
 
-dim(survey_merged) # 27,934 * 235
+dim(survey_merged) # 27,638 * 234
 
 # saveRDS(survey_merged, "output/mlr_merged.rds")
 # write_csv(survey_merged, "output/mlr_merged.csv")
