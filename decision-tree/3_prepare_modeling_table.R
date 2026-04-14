@@ -1,6 +1,8 @@
 library(tidyverse)
 
-nz_visitors <- readRDS("output/merged/nz_visitors.RDS")
+setwd("/home/rujal/Projects/nz-tourism/decision-tree")
+
+nz_visitors <- readRDS("output/merged/nz_visitors.rds")
 satisfaction <- read_csv("output/satisfaction_cleaned.csv")
 accommodation <- read_csv("output/accommodation_processed.csv")
 activities <- read_csv("output/activities_processed.csv")
@@ -53,7 +55,7 @@ dim(model_data) # 19239
 
 ###############################################
 
-# now make data ready to use in model (only columns that can be used in model)
+# make data ready to use in model (only columns that can be used in model)
 
 tree_model_data <- model_data |>
   select(
@@ -69,7 +71,7 @@ tree_model_data <- model_data |>
 ###############################################
 
 
-# now only columns specifically relevant for recommendation_tree_model
+# only columns specifically relevant for recommendation_tree_model
 
 reco_tree_model_data <- tree_model_data |>
   select(
@@ -85,7 +87,7 @@ dim(reco_tree_model_data)
 # saveRDS(reco_tree_model_data, "output/merged/reco_tree_model_data.rds")
 
 
-# now only columns specifically relevant for satisfaction_tree_model
+# only columns specifically relevant for satisfaction_tree_model
 
 satisfaction_tree_model_data <- tree_model_data |>
   select(

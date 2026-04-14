@@ -1,6 +1,6 @@
 library(tidyverse)
 
-# setwd(paste0(getwd(), "/decision-tree"))
+setwd("/home/rujal/Projects/nz-tourism/decision-tree")
 
 survey <- read_csv("../data/survey_main_header.csv")
 decision <- read_csv("../data/decision_making_process.csv")
@@ -815,7 +815,17 @@ mobility_processed <- mobility |>
     values_from = rating
   ) |>
   janitor::clean_names() |>
+  # Convert ordered factors to numeric and impute NAs with median
+  mutate(across(
+    -response_id,
+    ~ {
+      col_numeric <- as.numeric(.)
+      replace_na(col_numeric, median(col_numeric, na.rm = TRUE))
+    }
+  )) |>
   rename_with(~ paste0("mobility_", .), -response_id)
+
+sum(is.na(mobility_processed)) # 1532 NAs -> 0 after imputation
 
 # write_csv(mobility_processed, "output/mobility_processed.csv")
 # saveRDS(mobility_processed, "output/mobility_processed.rds")
