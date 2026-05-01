@@ -9,7 +9,7 @@ library(glue)
 plot_tree <- function(model) {
   font <- "Arial"
 
-  visTree(model, width = "100%", height = "900px", legend = FALSE) |>
+  visTree(model, width = "100%", height = "1280", legend = FALSE) |>
     visNodes(
       font = list(size = 12, face = font),
       widthConstraint = list(minimum = 200, maximum = 300)
@@ -23,7 +23,7 @@ plot_tree <- function(model) {
     ))
 }
 
-setwd("/Users/rujalshrestha/Projects/nz-tourism/decision-tree-v2")
+# setwd("/home/rujal/Projects/nz-tourism/decision-tree-v2")
 df <- readRDS("output/dt2_modal.rds")
 
 set.seed(123)
@@ -41,8 +41,8 @@ min_xerror_row <- which.min(cp_table[, "xerror"])
 # optimal_cp <- cp_table[cp_table[, "xerror"] <= threshold, "CP"] |> max()
 optimal_cp <- cp_table[min_xerror_row, "CP"]
 optimal_cp
-# prune
 
+# prune
 tree_pruned <- prune(tree_model_full, cp = 0.0012)
 
 #####################
@@ -56,7 +56,7 @@ tree_pruned <- prune(tree_model_full, cp = 0.0012)
 
 # plot tree
 p <- plot_tree(tree_pruned)
-p
+
 # saveWidget(p, "results/decision_tree.html", selfcontained = FALSE)
 
 #####################
@@ -81,7 +81,7 @@ tree_test <- prune(
 tree_preds <- predict(tree_test, test_data)
 mse <- mean((test_data$recommend_rating - tree_preds)^2)
 cat("Test MSE:", mse, "\n")
-# 1.827
+# 1.869
 
 
 ##########################################
@@ -92,21 +92,38 @@ importance_df <- data.frame(
   variable = names(tree_pruned$variable.importance),
   importance = tree_pruned$variable.importance
 ) |>
-  arrange(desc(importance))
+  arrange(desc(importance)) |>
+  slice_head(n = 20) |>
+  mutate(
+    variable = str_trunc(variable, width = 70)
+  )
 
 p_importance <- ggplot(
-  importance_df |> filter(importance >= 1),
+  importance_df,
   aes(x = reorder(variable, importance), y = importance)
 ) +
-  geom_col(fill = "steelblue") +
+  geom_col(fill = "steelblue", width = 0.75) +
   coord_flip() +
-  # scale_y_log10() +
   labs(
-    title = "Variable Importance from Pruned Decision Tree",
+    title = "Top 20 Variable Importances (Pruned Decision Tree)",
     x = "Variable",
-    y = "Importance (log scale)"
+    y = "Importance"
   ) +
-  theme_minimal(base_size = 16)
+  theme_minimal(base_size = 12) +
+  theme(
+    axis.text.y = element_text(size = 10),
+    plot.title = element_text(face = "bold")
+  )
 
 p_importance
-ggsave("results/variable_importance.jpg", dpi = 300)
+
+ggsave(
+  filename = "results/variable_importance.jpg",
+  plot = p_importance,
+  width = 18,
+  height = 8,
+  units = "in",
+  dpi = 300,
+  bg = "white",
+  limitsize = FALSE
+)

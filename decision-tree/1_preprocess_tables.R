@@ -31,7 +31,7 @@ survey_clean <- survey |>
     # "interview_date",
     "airport",
     "country_of_residence",
-    # "country_of_residence_group",
+    "country_of_residence_group",
     # "au_state_of_origin",
     "gender",
     "first_nz_trip",
@@ -1011,6 +1011,7 @@ survey_clean_final <- survey_clean_age |>
     departure_location = airport
   ) |>
   mutate(country_of_residence = fct_lump_min(country_of_residence, min = 10))
+
 
 # saveRDS(survey_clean_final, "output/survey_cleaned.rds")
 # write_csv(survey_clean_final, "output/survey_cleaned.csv")

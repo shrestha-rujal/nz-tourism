@@ -1,7 +1,7 @@
 library(tidyverse)
 library(fastDummies)
 
-# setwd("/home/rujal/Projects/nz-tourism/mlr")
+# setwd("/home/rujal/Projects/nz-tourism/decision-tree-v2")
 
 survey <- readRDS("../decision-tree/output/survey_cleaned.rds")
 
@@ -18,23 +18,23 @@ expenditure <- read_csv("../decision-tree/output/expenditure_cleaned.csv")
 satisfaction <- read_csv("../decision-tree/output/satisfaction_cleaned.csv")
 
 survey_cleaned <- survey |>
-  select(-sustainability_considered, -arrival_date, -arrival_month) |>
+  select(
+    -sustainability_considered,
+    -arrival_date,
+    -arrival_month,
+    -country_of_residence
+  ) |>
   filter(
     arrival_year != 2021
   ) |>
   mutate(
-    country_of_residence = fct_lump_min(
-      country_of_residence,
-      min = 100,
-      other_level = "Other"
-    ),
     gender = case_when(
       gender %in% c("Another Gender", "Rather not say") ~ "other_or_unspecified",
       TRUE ~ gender
     ),
     across(c(
       "departure_location",
-      "country_of_residence",
+      "country_of_residence_group",
       "gender",
       "arrival_location",
       "age_range",
