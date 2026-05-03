@@ -29,7 +29,7 @@ survey_cleaned <- survey |>
   ) |>
   mutate(
     gender = case_when(
-      gender %in% c("Another Gender", "Rather not say") ~ "other_or_unspecified",
+      gender %in% c("Another Gender", "Rather not say") ~ "Other",
       TRUE ~ gender
     ),
     across(c(
@@ -56,12 +56,12 @@ survey_merged <- survey_cleaned |>
   mutate(across(starts_with("accomm_"), ~ replace_na(., 0))) |>
   left_join(activities, by = "response_id") |>
   mutate(across(starts_with("activity_"), ~ replace_na(., 0))) |>
-  left_join(decision, by = "response_id") |>
-  mutate(across(starts_with("decision_"), ~ replace_na(., 0))) |>
+  # left_join(decision, by = "response_id") |>
+  # mutate(across(starts_with("decision_"), ~ replace_na(., 0))) |>
   left_join(maori_experience, by = "response_id") |>
   mutate(across(starts_with("maori_exp_"), ~ replace_na(., 0))) |>
-  left_join(mobility, by = "response_id") |>
-  mutate(across(starts_with("mobility_"), ~ replace_na(., median(., na.rm = TRUE)))) |>
+  # left_join(mobility, by = "response_id") |>
+  # mutate(across(starts_with("mobility_"), ~ replace_na(., median(., na.rm = TRUE)))) |>
   left_join(other_countries, by = "response_id") |>
   mutate(across(starts_with("other_countries_"), ~ replace_na(., 0))) |>
   left_join(region_visits, by = "response_id") |>
@@ -120,5 +120,5 @@ stat <- merged_cleaned |>
 # share_cost_other             3.3
 # share_cost_day_cruise        1.4
 
-# saveRDS(merged_cleaned, "output/dt2_modal.rds")
-# write_csv(merged_cleaned, "output/dt2_modal.csv")
+saveRDS(merged_cleaned, "output/dt2_modal.rds")
+write_csv(merged_cleaned, "output/dt2_modal.csv")
