@@ -53,9 +53,21 @@ tree_pruned <- prune(tree_model_full, cp = 0.0012)
 # PLOTTINGS
 #####################
 
-# plot cp chart
-# png("results/plots/cost_parameter_plot.png", width = 1200, height = 600)
-# plotcp(tree_model_full)
+# fake a model with truncated cptable
+tree_trimmed <- tree_model_full
+max_idx <- which.min(cp_table[, "xerror"]) * 3
+tree_trimmed$cptable <- cp_table[1:min(max_idx, nrow(cp_table)), ]
+
+# png("results/cost_parameter_plot.png", width = 1200, height = 600)
+par(mar = c(5, 4, 4, 2), ann = FALSE)
+plotcp(tree_trimmed)
+title(xlab = "Tree complexity (CP)", ylab = "Error", main = "")
+abline(v = min_xerror_row, col = "red", lwd = 2, lty = 2)
+text(
+  x = min_xerror_row, y = 0.95,
+  labels = paste("optimal cp =", signif(optimal_cp, 3)),
+  pos = 4, col = "red", cex = 0.9
+)
 # dev.off()
 
 # plot tree
@@ -92,13 +104,32 @@ cat("Test MSE:", mse, "\n")
 # ANALYSIS OF PREDICTORS
 ##########################################
 
+label_map <- c(
+  "activity_other_natural_attraction_e_g_mountain_lake_river_forest_etc" = "Natural attraction",
+  "accomm_staying_with_family_or_friends" = "Staying with family/friends",
+  "itinerary_region_otago" = "Visited Otago",
+  "departure_location" = "Departure location",
+  "gender" = "Gender",
+  "activity_went_for_a_walk_hike_trek_or_tramp" = "Walked / hiked",
+  "activity_a_place_that_is_significant_to_maori_such_as_a_landmark_remains_of_a_maori_pa_fortified_hill_etc" = "Māori significant place",
+  "no_days_in_nz" = "Days in NZ",
+  "share_cost_shopping" = "Shopping spend share",
+  "maori_exp_none_of_these" = "No Māori experiences",
+  "share_cost_food_drink" = "Food/Drinks spending (%)",
+  "share_cost_entertainment" = "Entertainment spending (%)",
+  "itinerary_region_wellington" = "Visited Wellington",
+  "treated_spend_capped" = "Total Expenditure",
+  "activity_a_national_park" = "Visited a National Park"
+)
+
 importance_df <- data.frame(
   variable = names(tree_pruned$variable.importance),
   importance = tree_pruned$variable.importance
 ) |>
   arrange(desc(importance)) |>
-  slice_head(n = 20) |>
+  slice_head(n = 10) |>
   mutate(
+    variable = dplyr::recode(variable, !!!label_map, .default = variable),
     variable = str_trunc(variable, width = 70)
   )
 
@@ -109,13 +140,13 @@ p_importance <- ggplot(
   geom_col(fill = "steelblue", width = 0.75) +
   coord_flip() +
   labs(
-    title = "Top 20 Variable Importances (Pruned Decision Tree)",
+    title = "Top 10 Variable Importances (Decision Tree)",
     x = "Variable",
     y = "Importance"
   ) +
-  theme_minimal(base_size = 12) +
+  theme_minimal(base_size = 14) +
   theme(
-    axis.text.y = element_text(size = 10),
+    axis.text.y = element_text(size = 16),
     plot.title = element_text(face = "bold")
   )
 
@@ -136,23 +167,6 @@ ggsave(
 ########################
 # poster
 ########################
-
-
-label_map <- c(
-  "activity_other_natural_attraction_e_g_mountain_lake_river_forest_etc" = "Natural attraction",
-  "accomm_staying_with_family_or_friends" = "Staying with family/friends",
-  "itinerary_region_otago" = "Visited Otago",
-  "departure_location" = "Departure location",
-  "gender" = "Gender",
-  "activity_went_for_a_walk_hike_trek_or_tramp" = "Walked/hiked",
-  "activity_a_place_that_is_significant_to_maori_such_as_a_landmark_remains_of_a_maori_pa_fortified_hill_etc" = "Māori significant place",
-  "no_days_in_nz" = "Days in NZ",
-  "share_cost_shopping" = "Shopping spend share",
-  "maori_exp_none_of_these" = "No Māori experiences",
-  "share_cost_food_drink" = "Food & drink spend share",
-  "share_cost_entertainment" = "Entertainment spend share",
-  "itinerary_region_wellington" = "Visited Wellington"
-)
 
 plot_tree_truncated <- function(model, max_depth = 5, label_map = NULL, ls = 150, ns = 200) {
   font <- "Arial"
