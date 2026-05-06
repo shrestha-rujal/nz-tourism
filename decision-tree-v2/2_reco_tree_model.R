@@ -46,8 +46,12 @@ min_xerror_row <- which.min(cp_table[, "xerror"])
 optimal_cp <- cp_table[min_xerror_row, "CP"]
 optimal_cp
 
+selected_cp <- optimal_cp
+
+selected_cp <- 0.0012
+
 # prune
-tree_pruned <- prune(tree_model_full, cp = 0.0012)
+tree_pruned <- prune(tree_model_full, cp = selected_cp)
 
 #####################
 # PLOTTINGS
@@ -65,7 +69,7 @@ title(xlab = "Tree complexity (CP)", ylab = "Error", main = "")
 abline(v = min_xerror_row, col = "red", lwd = 2, lty = 2)
 text(
   x = min_xerror_row, y = 0.95,
-  labels = paste("optimal cp =", signif(optimal_cp, 3)),
+  labels = paste("optimal cp =", signif(selected_cp, 3)),
   pos = 4, col = "red", cex = 0.9
 )
 # dev.off()
@@ -89,9 +93,9 @@ test_data <- df[-train_idx, ] |> select(-response_id)
 tree_test <- prune(
   rpart(recommend_rating ~ .,
     data = train_data,
-    method = "anova", control = rpart.control(cp = optimal_cp)
+    method = "anova", control = rpart.control(cp = selected_cp)
   ),
-  cp = optimal_cp
+  cp = selected_cp
 )
 
 tree_preds <- predict(tree_test, test_data)
@@ -110,16 +114,18 @@ label_map <- c(
   "itinerary_region_otago" = "Visited Otago",
   "departure_location" = "Departure location",
   "gender" = "Gender",
-  "activity_went_for_a_walk_hike_trek_or_tramp" = "Walked / hiked",
+  "activity_went_for_a_walk_hike_trek_or_tramp" = "Walked / Hiked",
   "activity_a_place_that_is_significant_to_maori_such_as_a_landmark_remains_of_a_maori_pa_fortified_hill_etc" = "Māori significant place",
   "no_days_in_nz" = "Days in NZ",
-  "share_cost_shopping" = "Shopping spend share",
+  "share_cost_shopping" = "Shopping Spending (%)",
   "maori_exp_none_of_these" = "No Māori experiences",
-  "share_cost_food_drink" = "Food/Drinks spending (%)",
+  "share_cost_food_drink" = "Meals Spending (%)",
   "share_cost_entertainment" = "Entertainment spending (%)",
   "itinerary_region_wellington" = "Visited Wellington",
   "treated_spend_capped" = "Total Expenditure",
-  "activity_a_national_park" = "Visited a National Park"
+  "activity_a_national_park" = "Visited a National Park",
+  "activity_brewery_gin_vineyard_wine_trail" = "Brewery & Wine Trails",
+  "share_cost_car_rentals" = "Rental Car Cost (%)"
 )
 
 importance_df <- data.frame(
@@ -234,10 +240,12 @@ plot_tree_truncated <- function(model, max_depth = 5, label_map = NULL, ls = 150
 
 p <- plot_tree_truncated(
   tree_pruned,
-  max_depth = 5,
+  max_depth = 6,
   label_map = label_map,
   ls = 175,
-  ns = 200
+  ns = 220
 )
+
+p
 
 saveWidget(p, "results/decision_tree_trunc.html", selfcontained = FALSE)
