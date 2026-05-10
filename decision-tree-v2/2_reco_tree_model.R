@@ -5,6 +5,7 @@ library(visNetwork)
 library(sparkline)
 library(htmlwidgets)
 library(glue)
+library(webshot2)
 
 plot_tree <- function(model) {
   font <- "Arial"
@@ -169,7 +170,6 @@ ggsave(
   limitsize = FALSE
 )
 
-
 ########################
 # poster
 ########################
@@ -189,9 +189,6 @@ plot_tree_truncated <- function(model, max_depth = 5, label_map = NULL, ls = 150
   keep_edges$label <- stringr::str_extract_all(keep_edges$title, "(?<=>)([^<]+)(?=<)") |>
     lapply(\(x) paste(x[-1], collapse = "\n")) |>
     unlist()
-
-  keep_nodes$font.size <- 20
-  keep_edges$font.size <- 12
 
   frame <- model$frame
   frame$node_id <- as.integer(rownames(frame))
@@ -218,16 +215,18 @@ plot_tree_truncated <- function(model, max_depth = 5, label_map = NULL, ls = 150
     keep_nodes$label <- dplyr::recode(keep_nodes$label, !!!label_map)
   }
 
+  keep_nodes$font.size <- 22
+
   visNetwork(
     nodes = keep_nodes, edges = keep_edges,
     width = "100%", height = "1280"
   ) |>
     visNodes(
-      font = list(size = 20, face = font, background = "white"),
+      font = list(face = font, background = "white"),
       widthConstraint = list(minimum = 200, maximum = 300)
     ) |>
     visEdges(
-      font = list(size = 12, face = font, align = "top", background = "white"),
+      font = list(size = 20, face = font, align = "top", background = "white"),
       smooth = list(enabled = TRUE)
     ) |>
     visHierarchicalLayout(direction = "UD", levelSeparation = ls, nodeSpacing = ns) |>
@@ -246,6 +245,11 @@ p <- plot_tree_truncated(
   ns = 220
 )
 
-p
-
 saveWidget(p, "results/decision_tree_trunc.html", selfcontained = FALSE)
+webshot2::webshot(
+  "results/decision_tree_trunc.html",
+  file = "results/decision_tree_hr.png",
+  vwidth = 3040,
+  vheight = 2560,
+  zoom = 6
+)
