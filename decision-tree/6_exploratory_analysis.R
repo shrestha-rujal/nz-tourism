@@ -195,34 +195,53 @@ ggsave(output_path("purpose_vs_satisfaction.png"),
 
 
 # KDE treated_spend
+spend_cap <- quantile(
+  df$treated_spend[df$treated_spend > 0 & !is.na(df$treated_spend)],
+  0.98,
+  na.rm = TRUE
+)
 
+p9_data <- df |>
+  filter(!is.na(treated_spend), treated_spend > 0, treated_spend <= spend_cap)
 
-p9 <- df |>
-  filter(!is.na(treated_spend), treated_spend > 0) |>
+median_spend <- median(p9_data$treated_spend, na.rm = TRUE)
+
+p9 <- p9_data |>
   ggplot(aes(x = treated_spend)) +
-  geom_density(fill = "steelblue", alpha = 0.6, colour = "steelblue4") +
+  geom_histogram(fill = "#4179a7", alpha = 1, colour = "white", bins = 40) +
   geom_vline(
-    xintercept = median(df$treated_spend, na.rm = TRUE),
+    xintercept = median_spend,
     colour = "#d73027", linetype = "dashed", linewidth = 0.9
   ) +
   annotate("text",
-    x = median(df$treated_spend, na.rm = TRUE) * 1.15,
+    x = median_spend * 1.15,
     y = Inf, vjust = 1.5, hjust = 0,
-    label = paste0("Median: NZD ", comma(round(median(df$treated_spend, na.rm = TRUE)))),
-    colour = "#d73027", size = 4
+    label = paste0("Median: NZD ", comma(round(median_spend))),
+    colour = "#2c7fb8", size = 6, fontface = "bold"
   ) +
-  scale_x_log10(labels = dollar_format(prefix = "NZD ")) +
+  # scale_x_log10(labels = dollar_format(prefix = "NZD ")) +
   labs(
-    title    = "Distribution of Visitor Spending (KDE)",
-    x        = "Total Treated Spend (NZD, log scale)",
-    y        = "Density",
-    caption  = "Source: IVS Microdata 2022–2025"
+    x        = "Total Treated Spend (NZD)",
+    y        = "Number of Respondents",
+    caption  = "Figure: Distribution of Visitor Spending. Source: IVS Microdata 2022–2025"
   ) +
-  theme_ivs()
+  theme_ivs() +
+  theme(
+    axis.title = element_text(size = 18),
+    axis.text = element_text(size = 14),
+    plot.caption = element_text(
+      size = 14,
+      colour = "black",
+      face = "italic",
+      hjust = 0.5,
+      margin = margin(t = 14)
+    ),
+    plot.caption.position = "plot"
+  )
 
 p9
 
-ggsave(output_path("kde_treated_spend.png"),
+ggsave(output_path("spending_distribution.png"),
   p9,
   width = 11, height = 6, dpi = 300, bg = "white"
 )
@@ -736,41 +755,41 @@ if (length(unmatched_n) > 0) message("Unmatched (nights):   ", paste(unmatched_n
 # PLOT 1 — unique visitor count per TA
 # ══════════════════════════════════════════════════════════════════════════════
 
-p_ta_visitors <- ggplot(ta_map_visitors) +
-  geom_sf(aes(fill = visitor_count), colour = "white", linewidth = 0.2) +
-  geom_label_repel(
-    data = top_visitors,
-    aes(x = lon, y = lat, label = paste0(join_name, "\n", comma(visitor_count))),
-    size = 5,
-    fill = "white",
-    colour = "#08306b",
-    label.size = 0.2,
-    segment.colour = "grey50",
-    seed = 42,
-    nudge_x = 2,
-    nudge_y = 1,
-    min.segment.length = 5
-  ) +
-  scale_fill_gradientn(
-    colours  = c("#f7fbff", "#c6dbef", "#6baed6", "#2171b5", "#08306b"),
-    na.value = "grey90",
-    labels   = comma_format(),
-    name     = "Visitors",
-    trans    = "log10"
-  ) +
-  labs(
-    title    = "Visitor Distribution Across NZ Territorial Authorities",
-    subtitle = "Number of unique survey respondents who stayed at least one night",
-    caption  = "Source: IVS Microdata 2022–2025. Boundaries: Stats NZ 2023. Log colour scale."
-  ) +
-  theme_void(base_size = 13) +
-  theme(
-    plot.title      = element_text(face = "bold", size = 16, margin = margin(b = 6)),
-    plot.subtitle   = element_text(colour = "grey40", size = 12, margin = margin(b = 10)),
-    plot.caption    = element_text(colour = "grey55", size = 10, margin = margin(t = 8)),
-    legend.position = "right",
-    plot.background = element_rect(fill = "white", colour = NA)
-  )
+# p_ta_visitors <- ggplot(ta_map_visitors) +
+#   geom_sf(aes(fill = visitor_count), colour = "white", linewidth = 0.2) +
+#   geom_label_repel(
+#     data = top_visitors,
+#     aes(x = lon, y = lat, label = paste0(join_name, "\n", comma(visitor_count))),
+#     size = 5,
+#     fill = "white",
+#     colour = "#08306b",
+#     label.size = 0.2,
+#     segment.colour = "grey50",
+#     seed = 42,
+#     nudge_x = 2,
+#     nudge_y = 1,
+#     min.segment.length = 5
+#   ) +
+#   scale_fill_gradientn(
+#     colours  = c("#f7fbff", "#c6dbef", "#6baed6", "#2171b5", "#08306b"),
+#     na.value = "grey90",
+#     labels   = comma_format(),
+#     name     = "Visitors",
+#     trans    = "log10"
+#   ) +
+#   labs(
+#     title    = "Visitor Distribution Across NZ Territorial Authorities",
+#     subtitle = "Number of unique survey respondents who stayed at least one night",
+#     caption  = "Source: IVS Microdata 2022–2025. Boundaries: Stats NZ 2023. Log colour scale."
+#   ) +
+#   theme_void(base_size = 13) +
+#   theme(
+#     plot.title      = element_text(face = "bold", size = 16, margin = margin(b = 6)),
+#     plot.subtitle   = element_text(colour = "grey40", size = 12, margin = margin(b = 10)),
+#     plot.caption    = element_text(colour = "grey55", size = 10, margin = margin(t = 8)),
+#     legend.position = "right",
+#     plot.background = element_rect(fill = "white", colour = NA)
+#   )
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -778,7 +797,7 @@ p_ta_visitors <- ggplot(ta_map_visitors) +
 # ══════════════════════════════════════════════════════════════════════════════
 
 p_ta_nights <- ggplot(ta_map_nights) +
-  geom_sf(aes(fill = mean_nights), colour = "white", linewidth = 0.2) +
+  geom_sf(aes(fill = mean_nights), colour = "#08306b", linewidth = 0.2) +
   geom_label_repel(
     data = top_nights,
     aes(x = lon, y = lat, label = paste0(join_name, "\n", round(mean_nights, 1), " nights")),
@@ -788,31 +807,41 @@ p_ta_nights <- ggplot(ta_map_nights) +
     label.size = 0.2,
     segment.colour = "grey50",
     seed = 42,
-    nudge_x = 2,
-    nudge_y = 1,
+    nudge_x = 30,
+    nudge_y = 30,
+    force = 10,
+    force_pull = 0.5,
+    box.padding = 2,
+    point.padding = 1,
+    direction = "both",
     min.segment.length = 0
   ) +
   scale_fill_gradientn(
-    colours  = c("#fff7ec", "#fdd49e", "#fc8d59", "#d7301f", "#7f0000"),
+    colours  = c("#f7fbff", "#c6dbef", "#6baed6", "#2171b5", "#08306b"),
     na.value = "grey90",
     labels   = function(x) paste0(round(x, 1), " nights"),
     name     = "Avg Nights"
   ) +
   labs(
-    title    = "Where Do Visitors Stay the Longest?",
-    subtitle = "Average nights per visitor by territorial authority",
-    caption  = "Source: IVS Microdata 2022–2025. Boundaries: Stats NZ 2023."
+    caption = "Figure: Average nights per visitor by territorial authority."
   ) +
   theme_void(base_size = 13) +
   theme(
-    plot.title      = element_text(face = "bold", size = 16, margin = margin(b = 6)),
-    plot.subtitle   = element_text(colour = "grey40", size = 12, margin = margin(b = 10)),
-    plot.caption    = element_text(colour = "grey55", size = 10, margin = margin(t = 8)),
-    legend.position = "right",
+    plot.caption = element_text(
+      colour = "black",
+      size = 18,
+      family = "sans",
+      face = "italic",
+      hjust = 0.5,
+      margin = margin(t = 12, b = 4)
+    ),
+    legend.position = c(0.95, 0.05),
+    legend.justification = c(1, 0),
+    legend.background = element_rect(fill = "white", colour = "grey80", linewidth = 0.3),
     plot.background = element_rect(fill = "white", colour = NA)
   )
 
-p_ta_visitors
+# p_ta_visitors
 p_ta_nights
 
 
@@ -822,11 +851,10 @@ p_ta_nights
 #   width = 9, height = 12, dpi = 300, bg = "white"
 # )
 
-# ggsave(output_path("ta_choropleth_avg_nights.png"),
-#   p_ta_nights,
-#   width = 9, height = 12, dpi = 300, bg = "white"
-# )
-
+ggsave(output_path("ta_choropleth_avg_nights.png"),
+  p_ta_nights,
+  width = 9, height = 12, dpi = 300, bg = "white"
+)
 
 
 # ══════════════════════════════════════════════════════════════════════════════

@@ -12,10 +12,10 @@ plot_tree <- function(model) {
 
   visTree(model, width = "100%", height = "1280", legend = FALSE) |>
     visNodes(
-      font = list(size = 12, face = font),
+      font = list(size = 12, face = font, color = "black"),
       widthConstraint = list(minimum = 200, maximum = 300)
     ) |>
-    visEdges(font = list(size = 10, face = font)) |>
+    visEdges(font = list(size = 10, face = font, color = "black")) |>
     visHierarchicalLayout(direction = "UD", levelSeparation = 150, nodeSpacing = 200) |>
     visInteraction(tooltipStyle = glue(
       "position: fixed; visibility: hidden; padding: 10px;
@@ -216,17 +216,18 @@ plot_tree_truncated <- function(model, max_depth = 5, label_map = NULL, ls = 150
   }
 
   keep_nodes$font.size <- 22
+  keep_nodes$font.color <- "black"
 
   visNetwork(
     nodes = keep_nodes, edges = keep_edges,
-    width = "100%", height = "1280"
+    width = "100%", height = "1350"
   ) |>
     visNodes(
-      font = list(face = font, background = "white"),
+      font = list(face = font, color = "black", background = "white"),
       widthConstraint = list(minimum = 200, maximum = 300)
     ) |>
     visEdges(
-      font = list(size = 20, face = font, align = "top", background = "white"),
+      font = list(size = 20, face = font, color = "black", align = "top", background = "white"),
       smooth = list(enabled = TRUE)
     ) |>
     visHierarchicalLayout(direction = "UD", levelSeparation = ls, nodeSpacing = ns) |>
@@ -248,8 +249,7 @@ p <- plot_tree_truncated(
 saveWidget(p, "results/decision_tree_trunc.html", selfcontained = FALSE)
 webshot2::webshot(
   "results/decision_tree_trunc.html",
-  file = "results/decision_tree_hr.png",
-  vwidth = 3040,
-  vheight = 2560,
-  zoom = 6
+  file = "results/decision_tree_hr.pdf",
+  vwidth = 4200,
+  vheight = 2200
 )
