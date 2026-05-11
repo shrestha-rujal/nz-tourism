@@ -247,9 +247,79 @@ p <- plot_tree_truncated(
 )
 
 saveWidget(p, "results/decision_tree_trunc.html", selfcontained = FALSE)
-webshot2::webshot(
-  "results/decision_tree_trunc.html",
-  file = "results/decision_tree_hr.pdf",
-  vwidth = 4200,
-  vheight = 2200
+# webshot2::webshot(
+#   "results/decision_tree_trunc.html",
+#   file = "results/decision_tree_hr.pdf",
+#   vwidth = 4200,
+#   vheight = 2200
+# )
+
+# additional bottom-only PNG export using the aliased, human-readable labels
+rename_tree_labels <- function(data, label_map) {
+  renamed <- data
+  label_hits <- intersect(names(label_map), names(renamed))
+
+  for (original_name in label_hits) {
+    names(renamed)[names(renamed) == original_name] <- label_map[[original_name]]
+  }
+
+  renamed
+}
+
+tree_plot_data <- df |>
+  select(-response_id, -visit_purpose, -country_of_residence_group) |>
+  rename_tree_labels(label_map)
+
+tree_plot_full <- rpart(
+  recommend_rating ~ .,
+  data = tree_plot_data,
+  method = "anova",
+  control = rpart.control(cp = 0.0001, xval = 10)
 )
+
+tree_plot_pruned <- prune(tree_plot_full, cp = selected_cp)
+
+format_tree_counts <- function(x, labs, digits, varlen) {
+  labs <- as.character(labs)
+  count_pattern <- "n\\s*=\\s*([0-9]+(?:\\.[0-9]+)?(?:[eE][+-]?[0-9]+)?)"
+
+  for (i in seq_along(labs)) {
+    matches <- gregexpr(count_pattern, labs[i], perl = TRUE)
+    if (matches[[1]][1] == -1) {
+      next
+    }
+
+    matched_text <- regmatches(labs[i], matches)[[1]]
+    replacement_text <- vapply(matched_text, function(match_text) {
+      count_value <- suppressWarnings(as.numeric(sub("^n\\s*=\\s*", "", match_text, perl = TRUE)))
+      if (is.na(count_value)) {
+        return(match_text)
+      }
+      paste0("n=", format(round(count_value), big.mark = ",", scientific = FALSE, trim = TRUE))
+    }, character(1))
+
+    regmatches(labs[i], matches) <- list(replacement_text)
+  }
+
+  labs
+}
+
+png("results/decision_tree_rpart_labels.png", width = 4500, height = 2500, res = 300, bg = "white")
+rpart.plot::prp(
+  tree_plot_pruned,
+  type = 2,
+  extra = 101,
+  fallen.leaves = TRUE,
+  faclen = 0,
+  varlen = 0,
+  box.palette = "Blues",
+  branch.col = "grey40",
+  split.col = "black",
+  shadow.col = NA,
+  tweak = 1.0,
+  under.cex = 1.0,
+  under = TRUE,
+  node.fun = format_tree_counts,
+  main = ""
+)
+dev.off()
